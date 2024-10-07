@@ -1,0 +1,52 @@
+@charset "utf-8";
+
+
+/*スライドショーのキーフレーム設定
+---------------------------------------------------------------------------*/
+@keyframes slide1 {
+	0% {opacity: 1;}
+	25%{opacity: 1;}
+	35%{opacity: 0;}
+	90% {opacity: 0;}
+	100% {opacity: 1;}
+}
+@keyframes slide2 {
+	0% {opacity: 0;}
+	25% {opacity: 0;}
+	35% {opacity: 1;}
+	60% {opacity: 1;}
+	70% {opacity: 0;}
+	100% {opacity: 0;}
+}
+@keyframes slide3 {
+	0% {opacity: 0;}
+	60% {opacity: 0;}
+	70% {opacity: 1;}
+	90% {opacity: 1;}
+	100% {opacity: 0;}
+}
+
+/*３枚の画像の共通設定*/
+.slide1,.slide2,.slide3 {
+	width: 100%;height: 100%;
+	position: absolute;right: 0px;top: 0px;z-index: -1;
+	text-indent: -9999px;
+}
+
+/*１枚目画像*/
+.slide1 {
+	animation: slide1 15s linear infinite, opa1 1s linear;
+	background: url(../images/1.jpg) no-repeat center center/cover;
+}
+
+/*２枚目画像*/
+.slide2 {
+	animation: slide2 15s linear infinite;
+	background: url(../images/2.jpg) no-repeat center center/cover;
+}
+
+/*３枚目画像*/
+.slide3 {
+	animation: slide3 15s linear infinite;
+	background: url(../images/3.jpg) no-repeat center center/cover;
+}
