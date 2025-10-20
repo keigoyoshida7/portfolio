@@ -230,7 +230,7 @@ main h2 {
 	margin: 0;
 	font-weight: normal;	/*太さを標準に*/
 	font-size: 2rem;		/*bodyで指定している文字サイズの2倍にする*/
-	letter-spacing: 0.3em;	/*文字間隔を広くとる*/
+	letter-spacing: 0.1em;	/*文字間隔を広くとる*/
 	text-indent: 0.3em;		/*上の行のletter-spacingと同じ値をセットする*/
 	text-align: center;		/*テキストをセンタリング*/
 	margin-bottom: 3rem;	/*下に空けるスペース*/
