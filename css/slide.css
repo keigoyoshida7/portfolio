@@ -36,17 +36,17 @@
 /*１枚目画像*/
 .slide1 {
 	animation: slide1 15s linear infinite, opa1 1s linear;
-	background: url(../images/2.jpg) no-repeat center center/cover;
+	background: url(../images/keigo-yoshida-liberated-frequencies-installation-2.jpg) no-repeat center center/cover;
 }
 
 /*２枚目画像*/
 .slide2 {
 	animation: slide2 15s linear infinite;
-	background: url(../images/1.jpg) no-repeat center center/cover;
+	background: url(../images/keigo-yoshida-liberated-frequencies-installation-1.jpg) no-repeat center center/cover;
 }
 
 /*３枚目画像*/
 .slide3 {
 	animation: slide3 15s linear infinite;
-	background: url(../images/3.jpg) no-repeat center center/cover;
+	background: url(../images/keigo-yoshida-liberated-frequencies-audiovisual-performance.jpg) no-repeat center center/cover;
 }
