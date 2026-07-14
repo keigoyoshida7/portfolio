@@ -36,7 +36,7 @@
 /*１枚目画像*/
 .slide1 {
 	animation: slide1 15s linear infinite, opa1 1s linear;
-	background: url(../images/keigo-yoshida-liberated-frequencies-installation-2.jpg) no-repeat center center/cover;
+	background: url(../images/vail-keigo-yoshida-2.png) no-repeat center center/cover;
 }
 
 /*２枚目画像*/
