@@ -616,6 +616,11 @@ dl.line dd {
 	width: calc(100% - 8rem);	/*「8rem」は上の「.new dt」のwidthの値です。*/
 }
 
+.new .history-link {
+	color: inherit;
+	text-decoration: none;
+}
+
 
 /*FAQ
 ---------------------------------------------------------------------------*/
