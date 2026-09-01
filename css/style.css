@@ -57,6 +57,19 @@ figure {margin: 0;}
 dd {margin: 0;}
 nav {margin: 0;padding: 0;}
 
+/*画面には表示せず、見出し構造を支援技術と検索エンジンに伝えるテキスト*/
+.visually-hidden {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
 /*table全般の設定*/
 table {border-collapse:collapse;}
 
@@ -225,8 +238,8 @@ main {
 	}
 	/*画面幅900px以上の追加指定ここまで*/
 
-/*h2タグ*/
-main h2 {
+/*h1、h2タグ*/
+main h1, main h2 {
 	margin: 0;
 	font-weight: normal;	/*太さを標準に*/
 	font-size: 2rem;		/*bodyで指定している文字サイズの2倍にする*/
@@ -236,8 +249,8 @@ main h2 {
 	margin-bottom: 3rem;	/*下に空けるスペース*/
 }
 
-/*h2タグ内のspanタグ。小文字部分。*/
-main h2 span {
+/*h1、h2タグ内のspanタグ。小文字部分。*/
+main h1 span, main h2 span {
 	display: block;
 	font-size: 0.4em;	/*文字サイズを親のh2の40%にする*/
 }
@@ -248,13 +261,13 @@ main h3 {
 }
 
 /*微調整*/
-p + h3,p + h2 {margin-top: 2rem;}
+p + h3,p + h2,p + h1 {margin-top: 2rem;}
 
 
 /*「ご挨拶」ページの見出し
 ---------------------------------------------------------------------------*/
 #greeting {
-	background: url(../images/4.png) no-repeat center center / cover;	/*背景画像の読み込み*/
+	background: url(../images/4.jpg) no-repeat center center / cover;	/*背景画像の読み込み*/
 	padding: 1rem;				/*ボックス内の余白。１文字分。*/
 	margin-left: -100px;		/*mainのmarginの数字にマイナスをつけます。*/
 	width: calc(100% + 200px);	/*mainのmarginの２倍をここの200pxでセットしています。上の行で左に-100pxずれた画像を幅一杯にする為の設定です。*/
@@ -270,21 +283,21 @@ p + h3,p + h2 {margin-top: 2rem;}
 	justify-content: center;	/*並びかたの種類の指定*/
 }
 
-/*ボックス内のh2*/
-.title-bg h2 {
+/*ボックス内のh1、h2*/
+.title-bg h1, .title-bg h2 {
 	display: flex;			/*flexボックスを使う指定*/
 	flex-direction: column;	/*縦並びにする指定*/
 	align-items: center;	/*垂直揃えの指定。天地中央に配置されるように。*/
 }
 
 /*縦書きにする指定*/
-.title-bg h2 .tate {
+.title-bg h1 .tate, .title-bg h2 .tate {
 	writing-mode: vertical-rl;
 	text-orientation: upright;
 }
 
 /*横書きで使う際の指定。※縦書きを横書きにする為の指定ではないのでご注意下さい。*/
-.title-bg h2 .yoko {
+.title-bg h1 .yoko, .title-bg h2 .yoko {
 	margin-top: 1rem;	/*上に空けるスペース*/
 	font-size: 0.4em;	/*文字サイズ。親要素の40%。*/
 }
@@ -480,6 +493,12 @@ footer a {text-decoration: none;}
 .list p {
 	margin: 0 0 1em;
 	font-size: 0.8rem;
+}
+
+.list .project-link,
+.contact-link {
+	color: inherit;
+	text-decoration: none;
 }
 
 

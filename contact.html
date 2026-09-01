@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Contact | Keigo Yoshida / 吉田慧悟</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="description" content="Contact information for Tokyo-based artist and researcher Keigo Yoshida (吉田慧悟) regarding exhibitions, performances, research, VJ, sound design, and collaborations.">
 <meta name="author" content="Keigo Yoshida / 吉田慧悟">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="https://keigoyoshida.jp/contact.html">
 
 <meta property="og:title" content="Contact | Keigo Yoshida / 吉田慧悟">
@@ -16,8 +18,11 @@
 <meta property="og:url" content="https://keigoyoshida.jp/contact.html">
 <meta property="og:image" content="https://keigoyoshida.jp/images/keigo-yoshida-portfolio-2.PNG">
 <meta property="og:image:alt" content="Portrait of artist and researcher Keigo Yoshida / 吉田慧悟">
-<meta property="og:locale" content="ja_JP">
-<meta property="og:locale:alternate" content="en_US">
+<meta property="og:image:width" content="1142">
+<meta property="og:image:height" content="1148">
+<meta property="og:image:type" content="image/png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ja_JP">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Contact | Keigo Yoshida / 吉田慧悟">
@@ -35,7 +40,7 @@
       "name": "Keigo Yoshida",
       "alternateName": "吉田慧悟",
       "url": "https://keigoyoshida.jp/",
-      "image": "https://keigoyoshida.jp/images/keigo-yoshida-portfolio.jpg",
+      "image": "https://keigoyoshida.jp/images/keigo-yoshida-portfolio.png",
       "jobTitle": "Artist and Researcher",
       "sameAs": [
         "https://www.instagram.com/keigoyoshida_/",
@@ -51,7 +56,26 @@
         "Artificial Intelligence",
         "Electronic Music"
       ],
-      "description": "Tokyo-based artist and researcher exploring sound through computational science and neuroscience, and integrating these perspectives into audiovisual performance and installation."
+      "description": "Tokyo-based artist and researcher exploring sound through computational science and neuroscience, and integrating these perspectives into audiovisual performance and installation.",
+      "givenName": "Keigo",
+      "familyName": "Yoshida",
+      "hasOccupation": [
+        {
+          "@type": "Occupation",
+          "name": "Artist"
+        },
+        {
+          "@type": "Occupation",
+          "name": "Researcher"
+        }
+      ],
+      "homeLocation": {
+        "@type": "Place",
+        "name": "Tokyo, Japan"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://keigoyoshida.jp/greeting.html#webpage"
+      }
     },
     {
       "@type": "WebSite",
@@ -65,14 +89,22 @@
       "inLanguage": [
         "ja",
         "en"
-      ]
+      ],
+      "about": {
+        "@id": "https://keigoyoshida.jp/#person"
+      },
+      "author": {
+        "@id": "https://keigoyoshida.jp/#person"
+      }
     },
     {
       "@type": "ImageObject",
       "@id": "https://keigoyoshida.jp/contact.html#primaryimage",
       "url": "https://keigoyoshida.jp/images/keigo-yoshida-portfolio-2.PNG",
       "contentUrl": "https://keigoyoshida.jp/images/keigo-yoshida-portfolio-2.PNG",
-      "caption": "Portrait of artist and researcher Keigo Yoshida / 吉田慧悟"
+      "caption": "Portrait of artist and researcher Keigo Yoshida / 吉田慧悟",
+      "width": 1142,
+      "height": 1148
     },
     {
       "@type": "ContactPage",
@@ -92,6 +124,37 @@
       "inLanguage": [
         "ja",
         "en"
+      ],
+      "dateModified": "2026-09-01",
+      "author": {
+        "@id": "https://keigoyoshida.jp/#person"
+      },
+      "publisher": {
+        "@id": "https://keigoyoshida.jp/#person"
+      },
+      "breadcrumb": {
+        "@id": "https://keigoyoshida.jp/contact.html#breadcrumb"
+      },
+      "mainEntity": {
+        "@id": "https://keigoyoshida.jp/#person"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://keigoyoshida.jp/contact.html#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://keigoyoshida.jp/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Contact",
+          "item": "https://keigoyoshida.jp/contact.html"
+        }
       ]
     }
   ]
@@ -107,16 +170,16 @@
 <div id="container">
 
 <header>
-<h1 id="logo"><a href="index.html"><img src="images/white.png" alt=""></a></h1>
+<div id="logo"><a href="index.html" aria-label="Keigo Yoshida / 吉田慧悟 — Home"><img src="images/white.png" alt="" width="344" height="134" decoding="async"></a></div>
 </header>
 
 <main>
 
 <section>
 
-<h2><span>Contact</span></h2>
+<h1><span>Contact</span></h1>
 
-<p class="c">Keigoyoshida@keio.jp<br></p>
+<p class="c"><a class="contact-link" href="mailto:Keigoyoshida@keio.jp">Keigoyoshida@keio.jp</a><br></p>
 
 </section>
 
@@ -136,7 +199,7 @@
 <!--開閉ブロック-->
 <div id="menubar">
 
-	<nav>
+	<nav aria-label="Primary navigation">
 		<h2>Contents</h2>
 		<ul class="submenu">
 		<li><a href="index.html">Home</a></li>
@@ -149,14 +212,14 @@
 		</nav>
 
 <ul class="icons">
-<li><a href="https://www.instagram.com/keigoyoshida_/"><i class="bi bi-instagram"></i></a></li>
+<li><a href="https://www.instagram.com/keigoyoshida_/" rel="me" aria-label="Keigo Yoshida on Instagram"><i class="bi bi-instagram" aria-hidden="true"></i></a></li>
 </ul>
 
 </div>
 <!--/#menubar-->
 
 <!--ページの上部へ戻るボタン-->
-<div class="pagetop"><a href="#"><i class="bi bi-arrow-up"></i></a></div>
+<div class="pagetop"><a href="#" aria-label="Back to top"><i class="bi bi-arrow-up" aria-hidden="true"></i></a></div>
 
 <!--開閉ボタン（ハンバーガーアイコン）-->
 <div id="menubar_hdr">
