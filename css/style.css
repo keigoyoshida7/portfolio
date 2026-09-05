@@ -267,7 +267,7 @@ p + h3,p + h2,p + h1 {margin-top: 2rem;}
 /*「ご挨拶」ページの見出し
 ---------------------------------------------------------------------------*/
 #greeting {
-	background: url(../images/4.jpg) no-repeat center center / cover;	/*背景画像の読み込み*/
+	background: url(../images/keigo-yoshida-circle-of-unconsciousness-1.jpg) no-repeat center center / cover;	/*背景画像の読み込み*/
 	padding: 1rem;				/*ボックス内の余白。１文字分。*/
 	margin-left: -100px;		/*mainのmarginの数字にマイナスをつけます。*/
 	width: calc(100% + 200px);	/*mainのmarginの２倍をここの200pxでセットしています。上の行で左に-100pxずれた画像を幅一杯にする為の設定です。*/

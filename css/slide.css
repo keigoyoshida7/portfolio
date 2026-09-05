@@ -30,23 +30,26 @@
 .slide1,.slide2,.slide3 {
 	width: 100%;height: 100%;
 	position: absolute;right: 0px;top: 0px;z-index: -1;
-	text-indent: -9999px;
 }
 
 /*１枚目画像*/
 .slide1 {
 	animation: slide1 15s linear infinite, opa1 1s linear;
-	background: url(../images/vail-keigo-yoshida-2.jpeg) no-repeat center center/cover;
 }
 
 /*２枚目画像*/
 .slide2 {
 	animation: slide2 15s linear infinite;
-	background: url(../images/keigo-yoshida-liberated-frequencies-installation-1.jpg) no-repeat center center/cover;
 }
 
 /*３枚目画像*/
 .slide3 {
 	animation: slide3 15s linear infinite;
-	background: url(../images/sonar-istanbul-performance-2.JPG) no-repeat center center/cover;
+}
+/* Keep the original background cover crop while exposing real image elements. */
+.slide1 img,.slide2 img,.slide3 img {
+	display: block;
+	width: 100%;height: 100%;
+	object-fit: cover;
+	object-position: center center;
 }
