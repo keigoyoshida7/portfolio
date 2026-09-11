@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://keigoyoshida.jp/</loc>
-    <lastmod>2026-09-10</lastmod>
+    <lastmod>2026-09-12</lastmod>
     <image:image>
       <image:loc>https://keigoyoshida.jp/images/vail-keigo-yoshida-2.jpeg</image:loc>
     </image:image>
@@ -21,7 +21,10 @@
   </url>
   <url>
     <loc>https://keigoyoshida.jp/room.html</loc>
-    <lastmod>2026-09-10</lastmod>
+    <lastmod>2026-09-12</lastmod>
+    <image:image>
+      <image:loc>https://keigoyoshida.jp/images/audio-buffer-tokyo-2026-09-16-flyer.jpg</image:loc>
+    </image:image>
     <image:image>
       <image:loc>https://keigoyoshida.jp/images/audio-buffer-tokyo-2026-flyer.jpg</image:loc>
     </image:image>
@@ -47,7 +50,10 @@
   </url>
   <url>
     <loc>https://keigoyoshida.jp/service.html</loc>
-    <lastmod>2026-09-10</lastmod>
+    <lastmod>2026-09-12</lastmod>
+    <image:image>
+      <image:loc>https://keigoyoshida.jp/images/audio-buffer-tokyo-2026-09-16-flyer.jpg</image:loc>
+    </image:image>
     <image:image>
       <image:loc>https://keigoyoshida.jp/images/audio-buffer-tokyo-2026-flyer.jpg</image:loc>
     </image:image>
@@ -538,6 +544,13 @@
     <lastmod>2026-09-10</lastmod>
     <image:image>
       <image:loc>https://keigoyoshida.jp/images/keigo-yoshida-VJ-at-Kagurane-Tokyo.png</image:loc>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://keigoyoshida.jp/room44.html</loc>
+    <lastmod>2026-09-12</lastmod>
+    <image:image>
+      <image:loc>https://keigoyoshida.jp/images/audio-buffer-tokyo-2026-09-16-flyer.jpg</image:loc>
     </image:image>
   </url>
 </urlset>
