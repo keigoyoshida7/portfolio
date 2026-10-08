@@ -90,5 +90,25 @@ window.LatentReferenceLinks = (() => {
     return container;
   }
 
-  return Object.freeze({append});
+  function appendSegments(container, segments) {
+    const doc = container.ownerDocument || document;
+    const fragment = doc.createDocumentFragment();
+    for (const segment of segments || []) {
+      const href = segment.href && safeUrl(segment.href);
+      if (href) {
+        const link = doc.createElement('a');
+        link.className = 'reference-text-link';
+        link.href = href;
+        link.textContent = segment.t;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = href;
+        fragment.appendChild(link);
+      } else fragment.appendChild(doc.createTextNode(segment.t));
+    }
+    container.appendChild(fragment);
+    return container;
+  }
+
+  return Object.freeze({append, appendSegments});
 })();

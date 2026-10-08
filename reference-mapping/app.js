@@ -23,6 +23,7 @@ const msg = (key, params = {}) => {
   return String(messages[locale][key] ?? messages.ja[key] ?? key).replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? ''));
 };
 let english = {titles: {}, clusters: {}, subgroups: {}, terms: {}}, englishLookup = new Map();
+let noteEnglish = {entries: {}};
 const englishLabel = value => english.titles[value] || english.terms[value] || englishLookup.get(normalize(value)) || value;
 const referenceTitle = node => locale === 'en' ? englishLabel(node?.title || '') : node?.title || '';
 const tagLabel = tag => locale === 'en' ? englishLabel(tag) : tag;
@@ -271,6 +272,7 @@ function updateDetailMode() {
 }
 
 function noteBody(node) {
+  if (locale === 'en') return noteEnglish.entries[node.id].body.map(segment => segment.t).join('').trim();
   const lines=String(node.text || '').split('\n');
   if (lines[0]?.trim() === node.title.trim()) lines.shift();
   return lines.join('\n').trim();
@@ -315,12 +317,16 @@ function renderDetail() {
   }
   const tags=el('div','detail-tags');
   n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${tagLabel(t)}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});content.append(tags);
-  const excerpt=String(n.excerpt || '').trim(), text=noteBody(n), preview=el('p','detail-excerpt');
-  window.LatentReferenceLinks.append(preview,excerpt || msg('detail.noText'),n.source,linkLabel);content.append(preview);
+  const translated=locale==='en'?noteEnglish.entries[n.id]:null;
+  const excerpt=translated?translated.excerpt.map(segment=>segment.t).join('').trim():String(n.excerpt || '').trim(), text=noteBody(n), preview=el('p','detail-excerpt');
+  preview.lang=locale;
+  if(translated&&excerpt)window.LatentReferenceLinks.appendSegments(preview,translated.excerpt);
+  else window.LatentReferenceLinks.append(preview,excerpt || msg('detail.noText'),n.source,linkLabel);
+  content.append(preview);
   if (text && text !== excerpt) {
     const toggle=el('button','detail-text-toggle',msg(fullText?'detail.hideText':'detail.readText'));
     toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});content.append(toggle);
-    if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
+    if (fullText) {const body=el('div','full-text');body.lang=locale;if(translated)window.LatentReferenceLinks.appendSegments(body,translated.body);else window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
   }
   const referenceLink=el('a','detail-link',msg('detail.referencePage'));referenceLink.href=referencePageUrl(n);content.append(referenceLink);
   const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
@@ -575,7 +581,7 @@ function setLanguage(next, persist=true) {
   locale=next;
   if (persist) { try {localStorage.setItem('latent-reference-language',locale);} catch {} }
   document.documentElement.lang=locale;
-  document.title=locale === 'en' ? 'Latent References | Keigo Yoshida | 吉田慧悟' : 'Latent References | 吉田慧悟 / Keigo Yoshida';
+  document.title=locale === 'en' ? 'Latent References | Keigo Yoshida' : 'Latent References | 吉田慧悟 / Keigo Yoshida';
   $('curator-link').textContent=locale === 'en' ? 'Keigo Yoshida' : '吉田慧悟 / Keigo Yoshida';
   hovered=null;$('hover-label').hidden=true;
   document.querySelector('meta[name="description"]').content=msg('static.description');
@@ -596,6 +602,7 @@ function setLanguage(next, persist=true) {
   needsRender=true;
 }
 document.querySelectorAll('[data-locale]').forEach(button=>button.addEventListener('click',()=>setLanguage(button.dataset.locale)));
+window.addEventListener('storage',event=>{if(event.key==='latent-reference-language')setLanguage(event.newValue,false);});
 
 function renderTrends() {
   if(!trends)return;
@@ -632,15 +639,16 @@ function renderTrends() {
 
 async function init() {
   try {
-    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-worldmaking', assetBase)),fetch(new URL('titles-en.json?v=20261008-worldmaking',assetBase))]);
-    if(!response.ok||!translationResponse.ok)throw new Error('Reference data could not be loaded');
-    [data,english]=await Promise.all([response.json(),translationResponse.json()]);
+    const [response,translationResponse,noteResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-worldmaking', assetBase)),fetch(new URL('titles-en.json?v=20261008-worldmaking',assetBase)),fetch(new URL('notes-en.json?v=20261009-full-en',assetBase))]);
+    if(!response.ok||!translationResponse.ok||!noteResponse.ok)throw new Error('Reference data could not be loaded');
+    [data,english,noteEnglish]=await Promise.all([response.json(),translationResponse.json(),noteResponse.json()]);
     englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
     nodes=data.nodes||[];edges=[...(data.edges||[]),...(data.extraEdges||[])];clusters=data.clusters||[];
     if(!nodes.length)throw new Error(msg('error.emptyArchive'));
+    if(nodes.some(node=>!Array.isArray(noteEnglish.entries[node.id]?.body)||!Array.isArray(noteEnglish.entries[node.id]?.excerpt)))throw new Error('English note translations are incomplete');
     const radii=nodes.map(n=>Math.hypot(...n.position)).sort((a,b)=>a-b);
     const radius=radii[Math.floor(radii.length*.94)] || 1;const scale=345/Math.max(1,radius);
-    for(const n of nodes){n.position=n.position.map(v=>v*scale);n.tags=n.tags||[];n.neighbors=n.neighbors||[];n.search=normalize(`${n.title}\n${englishLabel(n.title)}\n${n.text||n.excerpt||''}\n${n.tags.map(t=>`${t} ${englishLabel(t)}`).join(' ')}`);nodeMap.set(n.id,n);}
+    for(const n of nodes){n.position=n.position.map(v=>v*scale);n.tags=n.tags||[];n.neighbors=n.neighbors||[];n.search=normalize(`${n.title}\n${englishLabel(n.title)}\n${n.text||n.excerpt||''}\n${noteEnglish.entries[n.id].body.map(segment=>segment.t).join('')}\n${n.tags.map(t=>`${t} ${englishLabel(t)}`).join(' ')}`);nodeMap.set(n.id,n);}
     for(const c of clusters){c.position=(c.position||[0,0,0]).map(v=>v*scale);c.visibleCount=c.count;clusterMap.set(String(c.id),c);}
     renderClusterOptions();
     const counts={};nodes.forEach(n=>counts[n.source]=(counts[n.source]||0)+1);
