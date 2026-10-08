@@ -52,7 +52,7 @@ let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -10
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
 let randomPickInterval = 50;
-let rotationSpeed = 1.5;
+let rotationSpeed = 3.0;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
 document.body.classList.toggle('random-pick-active', randomPick);
 
