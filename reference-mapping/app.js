@@ -229,7 +229,8 @@ function renderSearch() {
 }
 
 function selectNode(node, pin = false, focus = false) {
-  if (pin || focus) {mobileDetailExpanded = true;stopRandomPick();}
+  if (pin || focus) stopRandomPick();
+  mobileDetailExpanded = false;
   const changed = selected?.id !== node.id;
   selected = node; pinned = pin; if (changed) fullText = false;
   document.body.classList.add('detail-visible'); $('detail').hidden = false;
