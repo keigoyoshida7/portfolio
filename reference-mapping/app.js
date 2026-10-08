@@ -487,7 +487,7 @@ function setLanguage(next, persist=true) {
   locale=next;
   if (persist) { try {localStorage.setItem('latent-reference-language',locale);} catch {} }
   document.documentElement.lang=locale;
-  document.title='Latent of References | Keigo Yoshida | 吉田慧悟';
+  document.title='Latent References | Keigo Yoshida | 吉田慧悟';
   document.querySelector('meta[name="description"]').content=msg('static.description');
   for (const binding of window.LatentI18n.static) {
     document.querySelectorAll(binding.selector).forEach(node=>{
@@ -562,7 +562,7 @@ async function init() {
     window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval:RANDOM_PICK_INTERVAL,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
-    $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent of References:',error);
+    $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent References:',error);
   }
 }
 setLanguage(locale,false);

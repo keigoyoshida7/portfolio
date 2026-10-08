@@ -4,7 +4,7 @@
 window.LatentI18n = {
   messages: {
     ja: {
-      'static.description': '吉田慧悟（Keigo Yoshida）の研究と制作をつなぐLatent of References。3,198件の公開ノートを、参照・語彙の類似・タグから辿る白黒の3Dリファレンスマップ。',
+      'static.description': '吉田慧悟（Keigo Yoshida）の研究と制作をつなぐLatent References。3,198件の公開ノートを、参照・語彙の類似・タグから辿る白黒の3Dリファレンスマップ。',
       'static.referenceIndex': '索引と配置の方法 ↗',
       'static.mapAria': '参考資料の3Dマップ。ドラッグで回転、スクロールで拡大。検索結果からキーボードでもページを選べます。',
       'static.headerNote': '思考の地形を、辿る。',
@@ -136,7 +136,7 @@ window.LatentI18n = {
       'error.mapAnnouncement': 'マップの読み込みに失敗しました。'
     },
     en: {
-      'static.description': 'Latent of References connects Keigo Yoshida’s (吉田慧悟) research and creative practice: explore 3,198 public notes through reference links, lexical similarity and tags in a monochrome 3D map.',
+      'static.description': 'Latent References connects Keigo Yoshida’s (吉田慧悟) research and creative practice: explore 3,198 public notes through reference links, lexical similarity and tags in a monochrome 3D map.',
       'static.referenceIndex': 'Reference index and method ↗',
       'static.mapAria': '3D reference map. Drag to rotate and scroll to zoom. You can also select pages by keyboard from the search results.',
       'static.headerNote': 'Trace the terrain of thought.',
