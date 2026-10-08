@@ -210,7 +210,7 @@ function showHover(node, pos) {
 
 function draw(now) {
   const center=viewCenter();
-  ctx.fillStyle='#050505';ctx.fillRect(0,0,width,height);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,width,height);
   if (!nodes.length) return;
   projected=[];labelHits=[];
   const positions=new Map();
@@ -258,9 +258,9 @@ function draw(now) {
       if(selected&&width>760&&x+w>width-350)continue;
       if(placed.some(r=>Math.abs(r.y-y)<28&&x<r.x+r.w+22&&x+w+22>r.x))continue;
       const focus=selectedCluster===String(c.id);
-      ctx.fillStyle=`rgba(5,5,5,${focus?.94:.75})`;ctx.fillRect(x-7,y-10,w+27,18);
-      ctx.fillStyle=focus?'#e4e4e4':selected?'#545454':'#989898';ctx.fillText(text,x,y);
-      ctx.font='7px Georgia,serif';ctx.fillStyle='#5c5c5c';ctx.fillText(String(c.visibleCount),x+w+7,y-2);ctx.font=`10px ${fontFamily}`;
+      ctx.fillStyle=`rgba(0,0,0,${focus?.94:.75})`;ctx.fillRect(x-7,y-10,w+27,18);
+      ctx.fillStyle='#fff';ctx.fillText(text,x,y);
+      ctx.font='7px Georgia,serif';ctx.fillStyle='#fff';ctx.fillText(String(c.visibleCount),x+w+7,y-2);ctx.font=`10px ${fontFamily}`;
       placed.push({x,y,w});labelHits.push({x:x-7,y:y-13,w:w+30,h:24,cluster:c});
     }
   }

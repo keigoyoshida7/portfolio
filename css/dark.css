@@ -1,0 +1,89 @@
+/* Shared black-and-white palette; the artwork keeps its original colors. */
+html.dark-theme {
+  color-scheme: dark;
+  background: #000;
+  --bg: #000;
+  --text: #fff;
+  --sub: #fff;
+  --dim: #fff;
+}
+
+.dark-theme body {
+  background: #000;
+}
+
+/* Keep the legacy negative-z-index slideshow above the body's black surface. */
+.dark-theme .home header {
+  isolation: isolate;
+}
+
+/* Also covers legacy inline credits and independent reference-page styles. */
+.dark-theme body,
+.dark-theme body * {
+  color: #fff !important;
+}
+
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder {
+  color: #fff;
+  opacity: 1;
+}
+
+.dark-theme body :focus-visible {
+  outline-color: #fff;
+}
+
+/* This opaque white file was only a blank logo placeholder on the light site. */
+.dark-theme #logo img[src$="/white.png"] {
+  visibility: hidden;
+}
+
+.dark-theme ::selection {
+  color: #fff !important;
+  background: #333;
+}
+
+.dark-theme #menubar,
+.dark-theme #menubar h2,
+.dark-theme .work-tile figure,
+.dark-theme .ta1 caption,
+.dark-theme .look,
+.dark-theme dialog,
+.dark-theme .no-script {
+  background: #000;
+}
+
+.dark-theme .animation-btn {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+.dark-theme .animation-btn::before,
+.dark-theme .animation-btn::after,
+.dark-theme .animation-btn-inner::before,
+.dark-theme .animation-btn-inner::after {
+  background-color: #fff;
+}
+
+.dark-theme .empty-state,
+.dark-theme .detail,
+.dark-theme .hover-label,
+.dark-theme .search-results {
+  background: rgba(0, 0, 0, 0.96);
+}
+
+.dark-theme .filters.mobile-open {
+  background: rgba(0, 0, 0, 0.98);
+}
+
+.dark-theme .camera-tools button {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .tag-button[aria-pressed="true"] {
+  background: #000;
+  border-color: #fff;
+}
+
+.dark-theme svg text {
+  fill: #fff;
+}
