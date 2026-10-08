@@ -33,7 +33,7 @@ let showLabels = true, showLines = true, motion = true, randomPick = true, simil
 let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
-let fullText = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
+let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
 let randomPickInterval = 500;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
 
@@ -52,6 +52,7 @@ function setRandomPick(enabled) {
   $('toggle-random').setAttribute('aria-pressed', String(randomPick));
   pointerInside = false; hovered = null; hoveredCandidate = null; $('hover-label').hidden = true;
   if (randomPick) {
+    mobileDetailExpanded = false;updateDetailMode();
     pinned = false;
     randomUiPointer = false;
     randomPointerHeld = false;
@@ -109,10 +110,12 @@ function pickRandomNode() {
 }
 
 function resize() {
+  const wasMobile = width <= 760;
   width = innerWidth; height = innerHeight; dpr = Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
   canvas.style.width = `${width}px`; canvas.style.height = `${height}px`;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); needsRender = true;
+  if (selected && wasMobile !== (width <= 760)) renderDetail();
 }
 addEventListener('resize', resize); resize();
 
@@ -213,7 +216,7 @@ function renderSearch() {
 }
 
 function selectNode(node, pin = false, focus = false) {
-  if (pin || focus) stopRandomPick();
+  if (pin || focus) {mobileDetailExpanded = true;stopRandomPick();}
   const changed = selected?.id !== node.id;
   selected = node; pinned = pin; if (changed) fullText = false;
   document.body.classList.add('detail-visible'); $('detail').hidden = false;
@@ -231,35 +234,61 @@ function closeDetail(manual = false) {
   if (manual) stopRandomPick();
   selected = null; hovered = null; pinned = false; hoveredCandidate=null;
   $('detail').hidden = true; $('hover-label').hidden = true;
-  document.body.classList.remove('detail-visible'); needsRender = true;
+  document.body.classList.remove('detail-visible');updateDetailMode();needsRender = true;
 }
 
-function cleanText(text) {
-  return String(text || '').replace(/\[(https?:\/\/\S+)\s+([^\]]+)\]/g,'$2').replace(/\[([^\]\n]+)\]/g,'$1').replace(/^\s*\[\*+\s*(.*?)\]\s*$/gm,'$1');
+function updateDetailMode() {
+  const compact = !!selected && width <= 760 && !mobileDetailExpanded;
+  $('detail').classList.toggle('detail-compact',compact);
+  document.body.classList.toggle('detail-compact-visible',compact);
+  return compact;
+}
+
+function noteBody(node) {
+  const lines=String(node.text || '').split('\n');
+  if (lines[0]?.trim() === node.title.trim()) lines.shift();
+  return lines.join('\n').trim();
 }
 
 function renderDetail() {
   if (!selected) return;
   const restoreAction=document.activeElement?.dataset?.action;
   const n=selected, box=$('detail'); box.replaceChildren();
+  const compact=updateDetailMode(), title=el('h2','',n.title);title.tabIndex=-1;
+  const content=el('div','detail-body');content.id='detail-body';
+  if (compact) {
+    const expand=el('button','detail-expand',msg('detail.expand'));expand.dataset.action='expand';
+    expand.setAttribute('aria-expanded','false');expand.setAttribute('aria-controls','detail-body');expand.title=msg('detail.expandTitle');
+    expand.addEventListener('click',()=>{
+      mobileDetailExpanded=true;stopRandomPick();pinned=true;renderDetail();box.scrollTop=0;needsRender=true;
+      box.querySelector('[data-action="collapse"]')?.focus({preventScroll:true});
+    });
+    content.hidden=true;box.append(title,expand,content);return;
+  }
   const top=el('div','detail-top'), actions=el('div','detail-actions');
   top.append(el('span','',msg(pinned ? 'detail.pinned' : 'detail.preview')));
+  if (width <= 760) {
+    const collapse=el('button','detail-collapse',msg('detail.collapse'));collapse.dataset.action='collapse';
+    collapse.setAttribute('aria-expanded','true');collapse.setAttribute('aria-controls','detail-body');
+    collapse.addEventListener('click',()=>{mobileDetailExpanded=false;renderDetail();needsRender=true;box.querySelector('[data-action="expand"]')?.focus({preventScroll:true});});
+    actions.append(collapse);
+  }
   const pin=el('button','',msg(pinned ? 'detail.unpin' : 'detail.pin')); pin.title=msg('detail.pinTitle');pin.dataset.action='pin';
   pin.addEventListener('click',()=>{stopRandomPick();pinned=!pinned;renderDetail();needsRender=true;});
   const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',()=>closeDetail(true));
-  actions.append(pin,close);top.append(actions);const title=el('h2','',n.title);title.tabIndex=-1;box.append(top,title,el('div','detail-source',sourceLabel(n.source)));
+  actions.append(pin,close);top.append(actions);box.append(top,title,content);content.append(el('div','detail-source',sourceLabel(n.source)));
   const tags=el('div','detail-tags');
-  n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${t}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});box.append(tags);
-  const excerpt=cleanText(n.excerpt || '').trim();
-  box.append(el('p','detail-excerpt',excerpt || msg('detail.noText')));
-  if (n.text && n.text.length > (n.excerpt || '').length + 80) {
+  n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${t}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});content.append(tags);
+  const excerpt=String(n.excerpt || '').trim(), text=noteBody(n), preview=el('p','detail-excerpt');
+  window.LatentReferenceLinks.append(preview,excerpt || msg('detail.noText'),n.source);content.append(preview);
+  if (text && text !== excerpt) {
     const toggle=el('button','detail-text-toggle',msg(fullText?'detail.hideText':'detail.readText'));
-    toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});box.append(toggle);
-    if (fullText) box.append(el('div','full-text',cleanText(n.text)));
+    toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});content.append(toggle);
+    if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source);content.append(body);}
   }
-  const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';box.append(link);
+  const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
   const cluster=clusterMap.get(String(n.cluster));
-  const heading=el('h3','',msg('detail.nearby')+(cluster ? ' / '+clusterLabel(cluster) : ''));box.append(heading);
+  const heading=el('h3','',msg('detail.nearby')+(cluster ? ' / '+clusterLabel(cluster) : ''));content.append(heading);
   const neighbors=(n.neighbors || []).filter(v=>nodeMap.has(v.id));
   neighbors.slice(0,8).forEach(v=>{
     const target=nodeMap.get(v.id), b=el('button','neighbor',target.title);
@@ -267,11 +296,11 @@ function renderDetail() {
     b.addEventListener('click',()=>{
       if (!visible.has(target.id)) { resetFilters(); }
       selectNode(target,true,true);
-    });box.append(b);
+    });content.append(b);
   });
-  if (!neighbors.length) box.append(el('p','fine-print',msg('detail.noNeighbors')));
+  if (!neighbors.length) content.append(el('p','fine-print',msg('detail.noNeighbors')));
   if (n.updated) {
-    const date=new Date(Number(n.updated)*1000);if(!Number.isNaN(date.valueOf()))box.append(el('p','fine-print',msg('detail.updated',{date:date.toLocaleDateString(locale==='ja'?'ja-JP':'en-GB')})));
+    const date=new Date(Number(n.updated)*1000);if(!Number.isNaN(date.valueOf()))content.append(el('p','fine-print',msg('detail.updated',{date:date.toLocaleDateString(locale==='ja'?'ja-JP':'en-GB')})));
   }
   if(restoreAction)[...box.querySelectorAll('button')].find(b=>b.dataset.action===restoreAction)?.focus({preventScroll:true});
 }
