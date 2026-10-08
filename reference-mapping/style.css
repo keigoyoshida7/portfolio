@@ -63,3 +63,9 @@
 .topic-review .detail-tags{margin:0}
 
 .author-credit .quick-index-link{font-size:10px;white-space:nowrap;color:#8f8f8f;border-bottom:1px solid #333;line-height:1.5}.detail-link+.detail-link{margin-left:14px}@media(max-width:760px){.author-credit{flex-wrap:wrap;row-gap:6px}.author-credit .quick-index-link{font-size:9px}.detail-link+.detail-link{margin-left:0}}
+
+@media(max-width:599px),(min-width:600px) and (max-width:760px) and (min-height:481px){
+  body.random-pick-active{--random-detail-height:min(49dvh,max(70px,calc(100dvh - 330px)))}
+  body.random-pick-active.detail-visible:not(.detail-compact-visible) .detail{top:auto;bottom:61px;height:var(--random-detail-height);max-height:var(--random-detail-height)}
+  body.random-pick-active.detail-visible:not(.detail-compact-visible) .map-space{--random-control-bottom:calc(var(--random-detail-height) + 73px - var(--footer))}
+}

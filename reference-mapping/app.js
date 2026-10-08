@@ -77,7 +77,7 @@ function setRandomPick(enabled) {
   $('toggle-random').setAttribute('aria-pressed', String(randomPick));
   pointerInside = false; hovered = null; hoveredCandidate = null; $('hover-label').hidden = true;
   if (randomPick) {
-    mobileDetailExpanded = false;updateDetailMode();
+    updateDetailMode();
     pinned = false;
     randomUiPointer = false;
     randomPointerHeld = false;
@@ -94,13 +94,13 @@ function stopRandomPick() {
 }
 
 function randomPauseRegion(target) {
-  return target instanceof Element ? target.closest('#detail, #filters, dialog') : null;
+  return target instanceof Element ? target.closest('#filters, dialog') : null;
 }
 
 function randomPickingPaused(now) {
   const focused = document.activeElement;
-  const readingFocus = focused instanceof Element && (focused.closest('#detail') ||
-    focused.matches('#filters input:not([type="checkbox"]):not([type="range"])'));
+  const readingFocus = focused instanceof Element &&
+    focused.matches('#filters input:not([type="checkbox"]):not([type="range"])');
   return document.hidden || pinned || !!dragState || pointers.size > 0 || randomPointerHeld ||
     randomUiPointer || !!readingFocus ||
     $('about').open || $('trends').open || now < randomPauseUntil;
@@ -129,7 +129,7 @@ function pickRandomNode() {
   }
   if (!candidates.length) return false;
   const node = candidates[Math.floor(Math.random() * candidates.length)].node;
-  selectNode(node, false, false);
+  selectNode(node, false, false, true);
   $('detail').scrollTop = 0;
   return true;
 }
@@ -240,9 +240,9 @@ function renderSearch() {
   else if (matches.length > 24) out.append(el('p','',msg('search.first',{count:number(matches.length)})));
 }
 
-function selectNode(node, pin = false, focus = false) {
+function selectNode(node, pin = false, focus = false, preserveDetailMode = false) {
   if (pin || focus) stopRandomPick();
-  mobileDetailExpanded = false;
+  if (!preserveDetailMode) mobileDetailExpanded = false;
   const changed = selected?.id !== node.id;
   selected = node; pinned = pin; if (changed) fullText = false;
   document.body.classList.add('detail-visible'); $('detail').hidden = false;
@@ -286,7 +286,7 @@ function renderDetail() {
     const expand=el('button','detail-expand',msg('detail.expand'));expand.dataset.action='expand';
     expand.setAttribute('aria-expanded','false');expand.setAttribute('aria-controls','detail-body');expand.title=msg('detail.expandTitle');
     expand.addEventListener('click',()=>{
-      mobileDetailExpanded=true;stopRandomPick();pinned=true;renderDetail();box.scrollTop=0;needsRender=true;
+      mobileDetailExpanded=true;if(!randomPick)pinned=true;renderDetail();box.scrollTop=0;needsRender=true;
       box.querySelector('[data-action="collapse"]')?.focus({preventScroll:true});
     });
     content.hidden=true;box.append(title,expand,content);return;
@@ -488,8 +488,8 @@ canvas.addEventListener('pointerleave',()=>{if(dragState)return;pointerInside=fa
 canvas.addEventListener('wheel',e=>{e.preventDefault();targetZoom=Math.max(.42,Math.min(4,targetZoom*Math.exp(-e.deltaY*.001)));lastInteraction=performance.now();needsRender=true;},{passive:false});
 document.querySelectorAll('button,input,select,a,dialog').forEach(x=>x.addEventListener('pointerenter',()=>{pointerInside=false;hovered=null;$('hover-label').hidden=true;}));
 
-// Guard the live detail DOM between pointer-down and click. Passive reading,
-// dialogs and dragging pause the cadence without changing its ON/OFF setting.
+// Guard the live detail DOM between pointer-down and click. Detail hover and
+// focus keep the cadence running; filters, dialogs and dragging pause it.
 document.addEventListener('pointerover',e=>{
   const inside=!!randomPauseRegion(e.target);
   if(inside!==randomUiPointer){randomUiPointer=inside;deferRandomPick();}
@@ -500,14 +500,12 @@ document.addEventListener('pointerout',e=>{
 },true);
 document.addEventListener('pointerdown',e=>{
   randomPointerHeld=true;deferRandomPick();
-  if(e.target instanceof Element&&e.target.closest('#detail'))stopRandomPick();
 },true);
 for(const event of ['pointerup','pointercancel'])document.addEventListener(event,()=>{randomPointerHeld=false;deferRandomPick();},true);
 document.addEventListener('wheel',e=>{
-  if(e.target instanceof Element&&e.target.closest('#detail'))stopRandomPick();
-  else if(randomPauseRegion(e.target)){randomPauseUntil=performance.now()+750;deferRandomPick();}
+  if(randomPauseRegion(e.target)||(e.target instanceof Element&&e.target.closest('#detail'))){randomPauseUntil=performance.now()+750;deferRandomPick();}
 },{capture:true,passive:true});
-document.addEventListener('keydown',e=>{if(randomPauseRegion(e.target)){randomPauseUntil=performance.now()+750;deferRandomPick();}},true);
+document.addEventListener('keydown',e=>{if(randomPauseRegion(e.target)||(e.target instanceof Element&&e.target.closest('#detail'))){randomPauseUntil=performance.now()+750;deferRandomPick();}},true);
 document.addEventListener('visibilitychange',deferRandomPick);
 
 $('search').addEventListener('input',()=>{stopRandomPick();clearTimeout(searchTimer);searchTimer=setTimeout(()=>{searchQuery=normalize($('search').value.trim());updateFilters();},100);});
