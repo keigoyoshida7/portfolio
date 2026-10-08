@@ -699,4 +699,12 @@
       <image:loc>https://keigoyoshida.jp/images/works/room31.webp</image:loc>
     </image:image>
   </url>
+  <url>
+    <loc>https://keigoyoshida.jp/reference-index.html</loc>
+    <lastmod>2026-10-08</lastmod>
+  </url>
+  <url>
+    <loc>https://keigoyoshida.jp/reference-mapping.html</loc>
+    <lastmod>2026-10-08</lastmod>
+  </url>
 </urlset>
