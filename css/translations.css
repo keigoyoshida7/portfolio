@@ -1,0 +1,5 @@
+/* Keep the added English copy readable within the legacy tables. */
+.ta1 p[lang="en"] {
+  word-break: normal;
+  overflow-wrap: break-word;
+}

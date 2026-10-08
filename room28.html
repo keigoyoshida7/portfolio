@@ -242,6 +242,7 @@
 </script>
 
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/translations.css?v=20261009">
 <link rel="icon" type="image/png" href="images/keigo-yoshida-portfolio-2.PNG">
 <link rel="stylesheet" href="css/dark.css">
 <link rel="stylesheet" href="css/palette-cycle.css?v=20261008-all-pages">
@@ -280,22 +281,30 @@
   <br>
   Authorship:<br>
   吉田慧悟は、本研究の共同著者（第4著者）として参加しています。論文には著者ごとの個別貢献は記載されていないため、担当範囲については共同著者であることを超えた記述を行っていません。<br>
+  <p lang="en">Keigo Yoshida participated in this study as a co-author (fourth author). The paper does not specify individual author contributions, so this page makes no claims about his responsibilities beyond his role as a co-author.</p>
 
   <br>
   About the Research:<br>
   音楽を聴いたときに生じる、身体を動かしたくなる快い衝動は「グルーヴ」と呼ばれます。グルーヴを生みやすいテンポやシンコペーションなどの共通要素が知られる一方、どの音楽に強く反応するかには大きな個人差があります。<br>
   本研究では、個人ごとのグルーヴ体験を最大化するプレイリストを生成するため、耳内脳波（in-ear EEG）を用いた閉ループ型のgroove brain-music interface（G-BMI）を開発しました。<br>
+  <p lang="en">The pleasurable urge to move one's body when listening to music is called “groove.” While shared features such as tempo and syncopation are known to facilitate groove, there are substantial individual differences in which music elicits a strong response.<br>
+  In this study, a closed-loop groove brain-music interface (G-BMI) using in-ear electroencephalography (EEG) was developed to generate playlists that maximize each individual's groove experience.</p>
 
   <br>
   Method:<br>
   24名の参加者が、ハイ・グルーヴとロー・グルーヴの楽曲を聴きながらin-ear EEGを記録し、各曲について「身体を動かしたい衝動」と快感を評価しました。<br>
   Model 1は、事前学習済みニューラルネットワークVGGishで抽出した音響特徴から、個人の「身体を動かしたい衝動」をLASSO回帰で予測します。Model 2は、EEGをハイ・グルーヴ／ロー・グルーヴ聴取時の状態へ分類します。<br>
   7,225曲の候補をModel 1で順位づけし、グルーヴを高める／弱める方向と、EEGフィードバックの有無を組み合わせた4種類のプレイリストを作成。EEGを使用する条件では、各曲の聴取後に脳波から推定した反応を取り込み、モデルと楽曲順位をリアルタイムに更新しました。<br>
+  <p lang="en">In-ear EEG was recorded from 24 participants as they listened to high-groove and low-groove music. They rated their urge to move and pleasure for each song.<br>
+  Model 1 uses LASSO regression to predict an individual's urge to move from acoustic features extracted by the pretrained neural network VGGish. Model 2 classifies EEG into states associated with listening to high-groove or low-groove music.<br>
+  Model 1 ranked a pool of 7,225 candidate songs. Four types of playlists were created by combining the direction of groove modulation (augmentation or diminution) with the presence or absence of EEG feedback. In the conditions using EEG, responses estimated from EEG after each song were fed back into the system to update the model and song rankings in real time.</p>
 
   <br>
   Results:<br>
   音響特徴とリアルタイムEEGの両方を用いてグルーヴを高めるAugEEGプレイリストは、4条件中で最も高い「身体を動かしたい衝動」の評価を得ました。AugEEGは、グルーヴを弱めるDimNoEEGおよびDimEEG条件より有意に高く、DimEEGより総合的なグルーヴ評価も有意に高い結果となりました。<br>
   一方で、快感そのものの評価にはプレイリスト間の有意差が見られず、「身体を動かしたい衝動」と快感は関連しつつも異なる要素であることも示されました。研究結果は、音響特徴と個人の脳波反応を組み合わせたニューロフィードバックが、一人ひとりに適した音楽推薦へ応用できる可能性を示しています。<br>
+  <p lang="en">The AugEEG playlist, which used both acoustic features and real-time EEG to augment groove, received the highest urge-to-move ratings among the four conditions. AugEEG received significantly higher urge-to-move ratings than the groove-diminishing DimNoEEG and DimEEG conditions, and significantly higher overall groove ratings than DimEEG.<br>
+  In contrast, ratings of pleasure itself did not differ significantly between playlists, indicating that the urge to move and pleasure are related but distinct components. The findings suggest that neurofeedback combining acoustic features with an individual's EEG responses may be applicable to personalized music recommendation.</p>
 
   <br>
   Funding:<br>
