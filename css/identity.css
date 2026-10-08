@@ -1,0 +1,76 @@
+.artist-intro {
+  max-width: 720px;
+}
+
+.artist-intro .artist-name {
+  margin: 0 0 18px;
+  color: #333;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-indent: 0;
+}
+
+.artist-name span {
+  display: inline;
+  margin-left: 12px;
+  font-size: 0.8em;
+}
+
+.artist-intro p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.artist-intro p[lang="ja"] {
+  font-size: 13px;
+}
+
+.artist-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 22px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.artist-links a {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.home .artist-intro + section {
+  margin-top: 64px;
+}
+
+.contact-identity {
+  margin: -16px auto 28px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.contact-identity .contact-name {
+  color: #333;
+  letter-spacing: 0.04em;
+}
+
+.contact-identity p {
+  margin: 0 0 8px;
+}
+
+.contact-identity p[lang="ja"] {
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .artist-intro .artist-name {
+    font-size: 16px;
+  }
+
+  .home .artist-intro + section {
+    margin-top: 48px;
+  }
+}

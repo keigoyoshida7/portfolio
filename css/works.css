@@ -21,6 +21,12 @@
   white-space: nowrap;
 }
 
+.works-home span {
+  margin-left: 10px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
 .works-header .works-nav {
   display: flex;
   gap: 26px;
