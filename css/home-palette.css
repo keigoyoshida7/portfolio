@@ -15,7 +15,7 @@ html.home-palette-cycle {
   --home-surface: #000;
   --home-ink: #fff;
   background: var(--home-surface);
-  animation: home-palette-cycle 1s ease-in-out infinite alternate;
+  animation: home-palette-cycle 5s ease-in-out infinite alternate;
 }
 
 @keyframes home-palette-cycle {
