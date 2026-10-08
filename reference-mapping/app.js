@@ -617,7 +617,7 @@ function renderTrends() {
 
 async function init() {
   try {
-    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-topics', assetBase)),fetch(new URL('titles-en.json?v=20261008-topics',assetBase))]);
+    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-worldmaking', assetBase)),fetch(new URL('titles-en.json?v=20261008-worldmaking',assetBase))]);
     if(!response.ok||!translationResponse.ok)throw new Error('Reference data could not be loaded');
     [data,english]=await Promise.all([response.json(),translationResponse.json()]);
     englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
@@ -638,7 +638,7 @@ async function init() {
     const originalFilterHandler=()=>{for(const c of clusters)c.visibleCount=0;for(const n of nodes)if(visible.has(n.id)){const c=clusterMap.get(String(n.cluster));if(c)c.visibleCount++;}};
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
-    try{const r=await fetch(new URL('trends.json?v=20261008-topics', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
+    try{const r=await fetch(new URL('trends.json?v=20261008-worldmaking', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
     window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
