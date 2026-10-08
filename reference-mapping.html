@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -16,8 +16,8 @@
   <meta property="og:url" content="https://keigoyoshida.jp/reference-mapping.html">
   <meta property="og:image" content="https://keigoyoshida.jp/reference-mapping/preview.jpg">
   <meta property="og:image:alt" content="Latent of References by Keigo Yoshida / 吉田慧悟: white reference clusters in a black three-dimensional map">
-  <meta property="og:locale" content="ja_JP">
-  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Latent of References | Keigo Yoshida | 吉田慧悟">
   <meta name="twitter:description" content="A 3D map connecting 3,198 public references across Keigo Yoshida's research and creative practice.">
@@ -45,7 +45,7 @@
     <div id="header-note" class="header-note">思考の地形を、辿る。</div>
     <button id="mobile-filters" class="text-button mobile-only" aria-expanded="false" aria-controls="filters">絞り込み ＋</button>
     <nav class="header-nav"><button id="trends-open" class="text-button"><span id="trends-label">思考の傾向</span> <span>↗</span></button><button id="about-open" class="text-button"><span id="about-label">この地図について</span> <span>↗</span></button></nav>
-    <div id="language-switch" class="language-switch" role="group" aria-label="表示言語"><button id="lang-jp" data-locale="ja" lang="ja" aria-label="日本語" aria-pressed="true">JP</button><span aria-hidden="true">/</span><button id="lang-en" data-locale="en" lang="en" aria-label="English" aria-pressed="false">EN</button></div>
+    <div id="language-switch" class="language-switch" role="group" aria-label="表示言語"><button id="lang-en" data-locale="en" lang="en" aria-label="English" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button id="lang-jp" data-locale="ja" lang="ja" aria-label="日本語" aria-pressed="false">JP</button></div>
   </header>
   <aside id="filters" class="filters" aria-label="表示の絞り込み">
     <div class="section-caption">01 <span id="explore-label">探索する</span></div>
@@ -54,9 +54,9 @@
     <div id="filter-summary" class="filter-summary">すべてのリファレンス</div>
     <div class="section-block">
       <div class="section-caption">02 <span id="collections-label">コレクション</span></div>
-      <label class="source-row"><input type="checkbox" value="NextResearch" checked class="source-filter"><span>NextResearch</span><small id="next-count">—</small></label>
-      <label class="source-row"><input type="checkbox" value="ideaofintellection" checked class="source-filter"><span>ideaofintellection</span><small id="idea-count">—</small></label>
-      <label class="source-row"><input type="checkbox" value="Test-Object" checked class="source-filter"><span>Test-Object</span><small id="test-count">—</small></label>
+      <label class="source-row"><input type="checkbox" value="NextResearch" checked class="source-filter"><span>Tag1</span><small id="next-count">—</small></label>
+      <label class="source-row"><input type="checkbox" value="ideaofintellection" checked class="source-filter"><span>Tag2</span><small id="idea-count">—</small></label>
+      <label class="source-row"><input type="checkbox" value="Test-Object" checked class="source-filter"><span>Tag3</span><small id="test-count">—</small></label>
     </div>
     <div class="section-block cluster-control">
       <div class="section-caption">03 <span id="clusters-label">群を選ぶ</span></div>
@@ -76,7 +76,7 @@
     <div id="loading" class="loading"><span class="loading-orbit"></span><span id="loading-label">思考の地形を読み込んでいます</span></div>
     <div id="empty" class="empty-state" hidden><h2 id="empty-title">該当する点がありません。</h2><p id="empty-description">言葉やタグ、出典の選択を変えてみてください。</p><button id="empty-reset" class="text-button">すべての点を表示 ↗</button></div>
     <div id="hover-label" class="hover-label" hidden></div>
-    <div class="view-tools" aria-label="表示設定"><button id="toggle-labels" aria-pressed="true">群の名前</button><button id="toggle-lines" aria-pressed="true">関係線</button><button id="toggle-motion" aria-pressed="false">自動回転</button></div>
+    <div class="view-tools" aria-label="表示設定"><button id="toggle-labels" aria-pressed="true">群の名前</button><button id="toggle-lines" aria-pressed="true">関係線</button><button id="toggle-motion" aria-pressed="true">自動回転</button></div>
     <label class="similarity-control"><span id="similarity-label">類似線の下限</span> <input id="similarity" type="range" min="0.05" max="0.90" step="0.05" value="0.25"><output id="similarity-value">0.25</output></label>
     <div class="camera-tools" aria-label="カメラ操作"><button id="zoom-in" aria-label="拡大">＋</button><button id="zoom-out" aria-label="縮小">−</button><button id="reset-camera" aria-label="視点をリセット">⌖</button></div>
     <div class="map-instructions">DRAG <span id="instruction-rotate">回転</span><i></i> SCROLL <span id="instruction-zoom">拡大</span><i></i> CLICK <span id="instruction-pin">詳細を固定</span></div>
@@ -85,8 +85,8 @@
   </main>
   <aside id="detail" class="detail" aria-label="ページの詳細" hidden></aside>
   <footer class="statusbar"><div class="live-status"><span class="status-dot"></span><strong id="visible-count">—</strong><span>/ <span id="total-count">—</span> <span id="status-references-label">references</span></span></div><div class="status-middle"><span id="cluster-count">—</span> <span id="status-clusters-label">clusters</span> <span class="status-divider">/</span> <span id="edge-count">—</span> <span id="status-connections-label">connections</span></div><div class="status-date" id="snapshot-date">ARCHIVE —</div></footer>
-  <dialog id="about" aria-labelledby="about-title"><button id="about-close" class="dialog-close" aria-label="閉じる">×</button><div class="language-switch dialog-language-switch" role="group" aria-label="表示言語"><button data-locale="ja" lang="ja" aria-label="日本語で表示" aria-pressed="true">JP</button><span aria-hidden="true">/</span><button data-locale="en" lang="en" aria-label="英語で表示" aria-pressed="false">EN</button></div><span class="eyebrow">READING THE MAP</span><h2 id="about-title">思考の地形。</h2><p id="about-intro">NextResearch、ideaofintellection、Test-Object にあるページを、参照と類似度から三次元に配置した地図です。すべての白い点が、実在するひとつのページに対応します。</p><div id="method-details"></div><h3 id="about-how-title">辿り方</h3><p id="about-how">ドラッグで回転、ホイールやピンチで拡大。点に触れると詳細が現れ、クリックすると固定します。検索結果や関連ページからも移動できます。タグを複数選ぶと、OR はいずれか、AND はすべてに一致するページを表示します。</p><div class="about-sources"><a href="https://scrapbox.io/NextResearch/" target="_blank" rel="noopener noreferrer">NextResearch ↗</a><a href="https://scrapbox.io/ideaofintellection/" target="_blank" rel="noopener noreferrer">ideaofintellection ↗</a><a href="https://scrapbox.io/Test-Object/" target="_blank" rel="noopener noreferrer">Test-Object ↗</a></div><p><a id="reference-index-link" class="index-link" href="./reference-index.html">索引と配置の方法 ↗</a></p><p class="fine-print" id="snapshot-info"></p></dialog>
-  <dialog id="trends" class="trends-dialog" aria-labelledby="trends-title"><button id="trends-close" class="dialog-close" aria-label="閉じる">×</button><div class="language-switch dialog-language-switch" role="group" aria-label="表示言語"><button data-locale="ja" lang="ja" aria-label="日本語で表示" aria-pressed="true">JP</button><span aria-hidden="true">/</span><button data-locale="en" lang="en" aria-label="英語で表示" aria-pressed="false">EN</button></div><span class="eyebrow">PATTERNS OF THOUGHT</span><h2 id="trends-title">思考の、重心。</h2><div id="trends-content"><p id="trends-loading">アーカイブの傾向を読み込んでいます。</p></div></dialog>
+  <dialog id="about" aria-labelledby="about-title"><button id="about-close" class="dialog-close" aria-label="閉じる">×</button><div class="language-switch dialog-language-switch" role="group" aria-label="表示言語"><button data-locale="en" lang="en" aria-label="Display in English" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button data-locale="ja" lang="ja" aria-label="Display in Japanese" aria-pressed="false">JP</button></div><span class="eyebrow">READING THE MAP</span><h2 id="about-title">思考の地形。</h2><p id="about-intro">Tag1、Tag2、Tag3 にあるページを、参照と類似度から三次元に配置した地図です。すべての白い点が、実在するひとつのページに対応します。</p><div id="method-details"></div><h3 id="about-how-title">辿り方</h3><p id="about-how">ドラッグで回転、ホイールやピンチで拡大。点に触れると詳細が現れ、クリックすると固定します。検索結果や関連ページからも移動できます。タグを複数選ぶと、OR はいずれか、AND はすべてに一致するページを表示します。</p><div class="about-sources"><a href="https://scrapbox.io/NextResearch/" target="_blank" rel="noopener noreferrer">Tag1 ↗</a><a href="https://scrapbox.io/ideaofintellection/" target="_blank" rel="noopener noreferrer">Tag2 ↗</a><a href="https://scrapbox.io/Test-Object/" target="_blank" rel="noopener noreferrer">Tag3 ↗</a></div><p><a id="reference-index-link" class="index-link" href="./reference-index.html">索引と配置の方法 ↗</a></p><p class="fine-print" id="snapshot-info"></p></dialog>
+  <dialog id="trends" class="trends-dialog" aria-labelledby="trends-title"><button id="trends-close" class="dialog-close" aria-label="閉じる">×</button><div class="language-switch dialog-language-switch" role="group" aria-label="表示言語"><button data-locale="en" lang="en" aria-label="Display in English" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button data-locale="ja" lang="ja" aria-label="Display in Japanese" aria-pressed="false">JP</button></div><span class="eyebrow">PATTERNS OF THOUGHT</span><h2 id="trends-title">思考の、重心。</h2><div id="trends-content"><p id="trends-loading">アーカイブの傾向を読み込んでいます。</p></div></dialog>
   <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
 </body>
 </html>

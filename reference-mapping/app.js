@@ -4,12 +4,14 @@ const assetBase = new URL('.', document.currentScript.src);
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; if (text !== undefined) x.textContent = text; return x; };
 const number = value => Number(value || 0).toLocaleString('en-US');
+const sourceAliases = {NextResearch:'Tag1', ideaofintellection:'Tag2', 'Test-Object':'Tag3'};
+const sourceLabel = source => sourceAliases[source] || source;
 const normalize = value => String(value || '').normalize('NFKC').toLowerCase();
 const canvas = $('map');
 const ctx = canvas.getContext('2d', { alpha: false });
 const fontFamily = '"Hiragino Mincho ProN", "Yu Mincho", YuMincho, Georgia, serif';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let locale = 'ja';
+let locale = 'en';
 try { const saved = localStorage.getItem('latent-reference-language'); if (saved === 'en' || saved === 'ja') locale = saved; } catch {}
 const msg = (key, params = {}) => {
   const messages = window.LatentI18n.messages;
@@ -27,7 +29,7 @@ let width = innerWidth, height = innerHeight, dpr = Math.min(devicePixelRatio ||
 let yaw = -.29, pitch = -.13, zoom = 1, panX = 0, panY = 0;
 let targetYaw = yaw, targetPitch = pitch, targetZoom = zoom, targetPanX = 0, targetPanY = 0;
 let visible = new Set(), projected = [], labelHits = [], selected = null, hovered = null, pinned = false;
-let showLabels = true, showLines = true, motion = false, similarity = .25, tagMode = 'OR';
+let showLabels = true, showLines = true, motion = true, similarity = .25, tagMode = 'OR';
 let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
@@ -128,7 +130,7 @@ function renderSearch() {
     return Number(bv)-Number(av) || b.degree-a.degree;
   });
   matches.slice(0,24).forEach(n => {
-    const b=el('button','search-result',n.title); b.append(el('small','',n.source));
+    const b=el('button','search-result',n.title); b.append(el('small','',sourceLabel(n.source)));
     b.addEventListener('click',()=>selectNode(n,true,true)); out.append(b);
   });
   if (!matches.length) out.append(el('p','',msg('search.none')));
@@ -168,7 +170,7 @@ function renderDetail() {
   const pin=el('button','',msg(pinned ? 'detail.unpin' : 'detail.pin')); pin.title=msg('detail.pinTitle');pin.dataset.action='pin';
   pin.addEventListener('click',()=>{pinned=!pinned;renderDetail();});
   const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',closeDetail);
-  actions.append(pin,close);top.append(actions);const title=el('h2','',n.title);title.tabIndex=-1;box.append(top,title,el('div','detail-source',n.source));
+  actions.append(pin,close);top.append(actions);const title=el('h2','',n.title);title.tabIndex=-1;box.append(top,title,el('div','detail-source',sourceLabel(n.source)));
   const tags=el('div','detail-tags');
   n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${t}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});box.append(tags);
   const excerpt=cleanText(n.excerpt || '').trim();
@@ -184,7 +186,7 @@ function renderDetail() {
   const neighbors=(n.neighbors || []).filter(v=>nodeMap.has(v.id));
   neighbors.slice(0,8).forEach(v=>{
     const target=nodeMap.get(v.id), b=el('button','neighbor',target.title);
-    b.append(el('small','',msg(v.type==='link'?'detail.linked':'detail.similarity',{score:Number(v.weight).toFixed(2),reason:reasonText(v.reason || target.source)})));
+    b.append(el('small','',msg(v.type==='link'?'detail.linked':'detail.similarity',{score:Number(v.weight).toFixed(2),reason:reasonText(v.reason || sourceLabel(target.source))})));
     b.addEventListener('click',()=>{
       if (!visible.has(target.id)) { resetFilters(); }
       selectNode(target,true,true);
@@ -200,7 +202,7 @@ function renderDetail() {
 function showHover(node, pos) {
   if (!node) {hovered=null;$('hover-label').hidden=true;return;}
   const changed=hovered?.id!==node.id;hovered=node;
-  const tip=$('hover-label');if(changed)tip.replaceChildren(document.createTextNode(node.title),el('small','',node.source));tip.hidden=false;
+  const tip=$('hover-label');if(changed)tip.replaceChildren(document.createTextNode(node.title),el('small','',sourceLabel(node.source)));tip.hidden=false;
   tip.style.left=`${Math.min(width-265,Math.max(12,pos.x+14))}px`;
   tip.style.top=`${Math.max(105,Math.min(height-110,pos.y-23))}px`;
   if (!pinned && selected?.id!==node.id) selectNode(node,false);
@@ -279,7 +281,7 @@ function hitLabel(x,y){return labelHits.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r
 
 function animate(now) {
   const dt=Math.min(40,now-(frameTime||now));frameTime=now;
-  if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000024;needsRender=true;}
+  if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000012;needsRender=true;}
   const delta=Math.abs(targetYaw-yaw)+Math.abs(targetPitch-pitch)+Math.abs(targetZoom-zoom)+Math.abs(targetPanX-panX)+Math.abs(targetPanY-panY);
   if(delta>.0002){
     const f=reducedMotion?1:Math.min(.30,dt*.013);
@@ -407,7 +409,7 @@ function renderTrends() {
   const box=$('trends-content');box.replaceChildren();
   const topThemes=(trends.themes||[]).filter(theme=>!theme.lowEvidence).slice(0,3).map(theme=>msg('trends.themeShare',{label:clusterLabel(clusterMap.get(String(theme.cluster))),share:(Number(theme.share)*100).toFixed(1)})).join(locale==='ja'?'、':', ');
   box.append(el('p','trend-summary',msg('trends.summary',{count:number(trends.metadata?.total||nodes.length),groups:number(trends.metadata?.clusterCount||clusters.length),themes:topThemes,bridges:number(trends.metadata?.bridgeCount||0)})));
-  const sourceStats=el('div','source-bars');(trends.sources||[]).forEach(s=>{const div=el('div','source-stat');div.append(el('span','',s.name),el('strong','',number(s.count)));sourceStats.append(div);});box.append(sourceStats);
+  const sourceStats=el('div','source-bars');(trends.sources||[]).forEach(s=>{const div=el('div','source-stat');div.append(el('span','',sourceLabel(s.name)),el('strong','',number(s.count)));sourceStats.append(div);});box.append(sourceStats);
   const themes=el('section','trend-section');themes.append(el('h3','',msg('trends.themes')),el('p','trend-subtitle',msg('trends.themesSubtitle')));
   const meaningfulThemes=(trends.themes||[]).filter(t=>!t.lowEvidence);
   const max=Math.max(1,...meaningfulThemes.map(t=>t.count));
@@ -418,7 +420,7 @@ function renderTrends() {
     const bar=el('span','theme-bar'),fill=el('i');fill.style.width=`${t.count/max*100}%`;bar.append(fill);
     const representativeTitles=(clusterMap.get(String(t.cluster))?.representatives||[]).map(id=>nodeMap.get(id)?.title).filter(Boolean);
     b.append(heading,bar,el('span','theme-terms',(representativeTitles.length?representativeTitles.slice(0,3):(t.terms||[]).slice(0,5)).join(' · ')));
-    if(t.sources){const labels={'NextResearch':'Next','ideaofintellection':'Idea','Test-Object':'Test'};const values=(trends.sources||[]).map(s=>`${labels[s.name]||s.name} ${((t.sources[s.name]||0)/Math.max(1,s.count)*100).toFixed(1)}%`);b.append(el('span','source-percent',values.join(' · ')+' / '+msg('trends.themeShareSuffix')));}
+    if(t.sources){const values=(trends.sources||[]).map(s=>`${sourceLabel(s.name)} ${((t.sources[s.name]||0)/Math.max(1,s.count)*100).toFixed(1)}%`);b.append(el('span','source-percent',values.join(' · ')+' / '+msg('trends.themeShareSuffix')));}
     b.addEventListener('click',()=>{$('trends').close();resetFilters();chooseCluster(t.cluster);});themes.append(b);
   });box.append(themes);
   const bridges=el('section','trend-section');bridges.append(el('h3','',msg('trends.bridges')),el('p','trend-subtitle',msg('trends.bridgesSubtitle')));
