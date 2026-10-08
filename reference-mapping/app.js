@@ -5,7 +5,12 @@ const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; if (text !== undefined) x.textContent = text; return x; };
 const number = value => Number(value || 0).toLocaleString('en-US');
 const sourceAliases = {NextResearch:'Tag1', ideaofintellection:'Tag2', 'Test-Object':'Tag3'};
+const sourceSlugs = {NextResearch:'nextresearch', ideaofintellection:'ideaofintellection', 'Test-Object':'test-object'};
 const sourceLabel = source => sourceAliases[source] || source;
+const referencePageUrl = node => {
+  const [source, id] = String(node.id).split(':');
+  return new URL(`references/${sourceSlugs[source]}/${id}.html`, document.baseURI).href;
+};
 const normalize = value => String(value || '').normalize('NFKC').toLowerCase();
 const canvas = $('map');
 const ctx = canvas.getContext('2d', { alpha: false });
@@ -310,6 +315,7 @@ function renderDetail() {
     toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});content.append(toggle);
     if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
   }
+  const referenceLink=el('a','detail-link',msg('detail.referencePage'));referenceLink.href=referencePageUrl(n);content.append(referenceLink);
   const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
   const topicNeighbors=(n.themeNeighbors||[]).filter(id=>nodeMap.has(id));
   if(topicNeighbors.length){
@@ -560,8 +566,8 @@ function setLanguage(next, persist=true) {
   locale=next;
   if (persist) { try {localStorage.setItem('latent-reference-language',locale);} catch {} }
   document.documentElement.lang=locale;
-  document.title=locale === 'en' ? 'Latent References | Keigo Yoshida' : 'Latent References | 吉田慧悟 / Keigo Yoshida';
-  document.querySelector('.author-credit > a:last-child').textContent=locale === 'en' ? 'Keigo Yoshida' : '吉田慧悟 / Keigo Yoshida';
+  document.title=locale === 'en' ? 'Latent References | Keigo Yoshida | 吉田慧悟' : 'Latent References | 吉田慧悟 / Keigo Yoshida';
+  $('curator-link').textContent=locale === 'en' ? 'Keigo Yoshida' : '吉田慧悟 / Keigo Yoshida';
   hovered=null;$('hover-label').hidden=true;
   document.querySelector('meta[name="description"]').content=msg('static.description');
   for (const binding of window.LatentI18n.static) {
@@ -633,7 +639,10 @@ async function init() {
     $('total-count').textContent=number(nodes.length);$('cluster-count').textContent=number(clusters.length);
     renderAbout();
     $('loading').hidden=true;updateFilters();
-    if(randomPick){pickRandomNode();deferRandomPick();}
+    const requestedReference = new URLSearchParams(location.search).get('reference');
+    const linkedNode = requestedReference && nodeMap.get(requestedReference);
+    if(linkedNode) selectNode(linkedNode,true,true);
+    else if(randomPick){pickRandomNode();deferRandomPick();}
     // Cluster labels always reflect the visible subset, without recomputing the established layout.
     const originalFilterHandler=()=>{for(const c of clusters)c.visibleCount=0;for(const n of nodes)if(visible.has(n.id)){const c=clusterMap.get(String(n.cluster));if(c)c.visibleCount++;}};
     originalFilterHandler();

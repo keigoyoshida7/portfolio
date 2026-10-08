@@ -8,7 +8,10 @@
   function setLanguage(next) {
     if (next !== 'en' && next !== 'ja') return;
     locale = next;
-    document.title = locale === 'en' ? 'Latent References — Reference index | Keigo Yoshida' : 'Latent References — 索引 | 吉田慧悟 / Keigo Yoshida';
+    const titles = document.documentElement.dataset;
+    const title = locale === 'en' ? titles.referenceTitleEn : titles.referenceTitleJa;
+    if (title) document.title = title;
+    document.documentElement.lang = locale;
     try { localStorage.setItem('latent-reference-language', locale); } catch {}
     document.querySelectorAll('[data-reference-en]').forEach(node => {
       node.textContent = locale === 'ja' ? node.dataset.referenceJa : node.dataset.referenceEn;

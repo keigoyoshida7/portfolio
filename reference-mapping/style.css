@@ -61,3 +61,5 @@
 .topic-review h3{margin:0 0 10px;font-size:12px;line-height:1.6}
 .topic-review p{margin:0 0 12px;line-height:1.7}
 .topic-review .detail-tags{margin:0}
+
+.author-credit .quick-index-link{font-size:10px;white-space:nowrap;color:#8f8f8f;border-bottom:1px solid #333;line-height:1.5}.detail-link+.detail-link{margin-left:14px}@media(max-width:760px){.author-credit{flex-wrap:wrap;row-gap:6px}.author-credit .quick-index-link{font-size:9px}.detail-link+.detail-link{margin-left:0}}

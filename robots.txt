@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://keigoyoshida.jp/sitemap.xml
-
+Sitemap: https://keigoyoshida.jp/reference-sitemap.xml

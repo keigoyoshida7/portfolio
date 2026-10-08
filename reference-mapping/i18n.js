@@ -4,8 +4,9 @@
 window.LatentI18n = {
   messages: {
     ja: {
-      'static.description': '吉田慧悟（Keigo Yoshida）の研究と制作をつなぐLatent References。3,198件の公開ノートを、参照・語彙の類似・タグから辿る白黒の3Dリファレンスマップ。',
+      'static.description': '吉田慧悟（Keigo Yoshida）が編集するLatent References。3,198件の公開リファレンスを、原典・語彙の類似・タグ・読み直したテーマから辿る3Dマップと閲覧用アーカイブ。',
       'static.referenceIndex': '索引と配置の方法 ↗',
+      'static.quickIndex': '索引 ↗',
       'static.mapAria': '参考資料の3Dマップ。ドラッグで回転、スクロールで拡大。検索結果からキーボードでもページを選べます。',
       'static.headerNote': '思考の地形を、辿る。',
       'static.home': '← ホーム',
@@ -63,7 +64,7 @@ window.LatentI18n = {
       'static.close': '閉じる',
       'static.aboutEyebrow': '地図の読み方',
       'static.aboutTitle': '思考の地形。',
-      'static.aboutIntro': 'Tag1、Tag2、Tag3 にあるページを、参照・類似度・原文を読み直したテーマから三次元に配置した地図です。すべての白い点が、実在するひとつのページに対応します。',
+      'static.aboutIntro': 'Latent Referencesは、吉田慧悟（Keigo Yoshida）が編集する、研究と制作の参照アーカイブです。Tag1、Tag2、Tag3 にあるページを、参照・類似度・原文を読み直したテーマから三次元に配置しています。すべての白い点が、実在するひとつのページに対応します。各リファレンスのページには原典、本文、分類の根拠、関連する参照を掲載しています。収録する作品・論文・ツールの著者は、それぞれの原典で確認できます。',
       'static.aboutHowTitle': '辿り方',
       'static.aboutHow': '最初は自動回転とランダムピックがオンになり、0.5秒ごとに点と詳細を切り替えます。ピックの間隔はスライダーで0.5〜2秒に調整できます。スマートフォンでは下端にタイトルを表示し、「展開」で詳細を開くとランダムピックが停止します。ランダムピックをオフにするか、点をクリックして固定すると、選んだページをじっくり読めます。ドラッグで回転、ホイールやピンチで拡大。点に触れると詳細が現れ、クリックすると固定します。検索結果や関連ページからも移動できます。タグを複数選ぶと、OR はいずれか、AND はすべてに一致するページを表示します。',
       'static.trendsEyebrow': '思考の傾向',
@@ -98,6 +99,7 @@ window.LatentI18n = {
       'detail.readText': '本文の記録を読む ＋',
       'detail.hideText': '本文を閉じる',
       'detail.openOriginal': 'Scrapboxで開く ↗',
+      'detail.referencePage': 'リファレンスのページ ↗',
       'about.language': 'ENではタイトル・群名を英語表記で表示します。ノート本文は原文で読めます。',
       'about.threshold': '類似線の下限は0まで下げられます。低くするほど弱い類似も多く表示し、点や群の配置は保ちます。',
       'detail.nearby': '近傍のリファレンス',
@@ -150,8 +152,9 @@ window.LatentI18n = {
       'error.mapAnnouncement': 'マップの読み込みに失敗しました。'
     },
     en: {
-      'static.description': 'Latent References connects Keigo Yoshida’s (吉田慧悟) research and creative practice: explore 3,198 public notes through reference links, lexical similarity and tags in a monochrome 3D map.',
+      'static.description': 'Latent References, curated by Keigo Yoshida (吉田慧悟): a 3D map and readable archive of 3,198 public references, source texts, tags, lexical similarities and reviewed topics.',
       'static.referenceIndex': 'Reference index and method ↗',
+      'static.quickIndex': 'Index ↗',
       'static.mapAria': '3D reference map. Drag to rotate and scroll to zoom. You can also select pages by keyboard from the search results.',
       'static.headerNote': 'Trace the terrain of thought.',
       'static.home': '← Home',
@@ -209,7 +212,7 @@ window.LatentI18n = {
       'static.close': 'Close',
       'static.aboutEyebrow': 'READING THE MAP',
       'static.aboutTitle': 'A terrain of thought.',
-      'static.aboutIntro': 'Pages from Tag1, Tag2 and Tag3 are arranged in three dimensions using references, similarity and topics reviewed from source content. Every white point represents an actual page.',
+      'static.aboutIntro': 'Latent References is an archive of research and creative references curated by Keigo Yoshida (吉田慧悟). Pages from Tag1, Tag2 and Tag3 are arranged in three dimensions using references, similarity and topics reviewed from source content. Every white point represents an actual page. Each reference page includes its source, archived text, grouping context and related references. Authors of the referenced works, papers and tools are credited at their original sources.',
       'static.aboutHowTitle': 'How to explore',
       'static.aboutHow': 'Auto rotate and Random pick start on. A new point and its details appear every 0.5 seconds by default. Use the Pick interval slider to adjust this from 0.5 to 2 seconds. On mobile, titles appear at the bottom; Expand opens details and stops random picking. Turn Random pick off or click a point to pin it for reading. Drag to rotate; use the wheel or pinch to zoom. Hover over a point to reveal its details, then click to pin them. You can also navigate through search results and related pages. With multiple tags, OR shows pages matching any selected tag; AND requires all selected tags.',
       'static.trendsEyebrow': 'PATTERNS OF THOUGHT',
@@ -244,6 +247,7 @@ window.LatentI18n = {
       'detail.readText': 'Read the full note ＋',
       'detail.hideText': 'Hide full text',
       'detail.openOriginal': 'Open in Scrapbox ↗',
+      'detail.referencePage': 'Reference page ↗',
       'about.language': 'EN displays English titles and group names. Note text is available in its source language.',
       'about.threshold': 'The similarity threshold goes down to 0. Lower values show more, weaker similarities while preserving the positions of points and groups.',
       'detail.nearby': 'Nearby references',
@@ -357,6 +361,7 @@ window.LatentI18n = {
     { selector: '#about-how-title', key: 'static.aboutHowTitle' },
     { selector: '#about-how', key: 'static.aboutHow' },
     { selector: '#reference-index-link', key: 'static.referenceIndex' },
+    { selector: '#quick-index-link', key: 'static.quickIndex' },
     { selector: '#trends-close', key: 'static.close', attribute: 'aria-label' },
     { selector: '#trends > .eyebrow', key: 'static.trendsEyebrow' },
     { selector: '#trends-title', key: 'static.trendsTitle' },
