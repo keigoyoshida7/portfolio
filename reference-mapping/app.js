@@ -60,7 +60,7 @@ function deferRandomPick() {
 }
 
 function updateRandomInterval() {
-  const seconds = (randomPickInterval / 1000).toFixed(1);
+  const seconds = (randomPickInterval / 1000).toFixed(2).replace(/0$/, '');
   $('random-interval-value').textContent = `${seconds} s`;
   $('random-interval').setAttribute('aria-valuetext', msg('controls.pickIntervalValue', {seconds}));
 }
