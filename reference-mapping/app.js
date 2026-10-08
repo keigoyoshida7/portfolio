@@ -29,11 +29,78 @@ let width = innerWidth, height = innerHeight, dpr = Math.min(devicePixelRatio ||
 let yaw = -.29, pitch = -.13, zoom = 1, panX = 0, panY = 0;
 let targetYaw = yaw, targetPitch = pitch, targetZoom = zoom, targetPanX = 0, targetPanY = 0;
 let visible = new Set(), projected = [], labelHits = [], selected = null, hovered = null, pinned = false;
-let showLabels = true, showLines = true, motion = true, similarity = .25, tagMode = 'OR';
+let showLabels = true, showLines = true, motion = true, randomPick = true, similarity = .05, tagMode = 'OR';
 let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
+const RANDOM_PICK_INTERVAL = 500;
+let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
+
+function deferRandomPick() {
+  nextRandomPick = performance.now() + RANDOM_PICK_INTERVAL;
+}
+
+function setRandomPick(enabled) {
+  randomPick = enabled;
+  $('toggle-random').setAttribute('aria-pressed', String(randomPick));
+  pointerInside = false; hovered = null; hoveredCandidate = null; $('hover-label').hidden = true;
+  if (randomPick) {
+    pinned = false;
+    randomUiPointer = false;
+    randomPointerHeld = false;
+    randomPauseUntil = 0;
+    nextRandomPick = 0;
+    if (!pickRandomNode() && selected) renderDetail();
+    deferRandomPick();
+  }
+  needsRender = true;
+}
+
+function stopRandomPick() {
+  if (randomPick) setRandomPick(false);
+}
+
+function randomPauseRegion(target) {
+  return target instanceof Element ? target.closest('#detail, #filters, dialog') : null;
+}
+
+function randomPickingPaused(now) {
+  const focused = document.activeElement;
+  const readingFocus = focused instanceof Element && (focused.closest('#detail') ||
+    focused.matches('#filters input:not([type="checkbox"]):not([type="range"])'));
+  return document.hidden || pinned || !!dragState || pointers.size > 0 || randomPointerHeld ||
+    randomUiPointer || !!readingFocus ||
+    $('about').open || $('trends').open || now < randomPauseUntil;
+}
+
+function randomCandidateRects() {
+  const selectors = '#filters, #detail, .masthead, .view-tools, .camera-tools, .similarity-control, .statusbar, dialog[open]';
+  return [...document.querySelectorAll(selectors)].filter(element => !element.hidden && element.getClientRects().length)
+    .map(element => element.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0);
+}
+
+function pickRandomNode() {
+  if (!randomPick || !visible.size || !nodes.length) return false;
+  const covered = randomCandidateRects(), center = viewCenter();
+  // Reproject at pick time so a just-applied filter or camera change cannot
+  // choose an old screen position from the previous rendered frame.
+  const points = nodes.filter(node => visible.has(node.id)).map(node => ({...project(node.position, center), node}));
+  let candidates = points.filter(point => visible.has(point.node.id) && point.node.id !== selected?.id &&
+    point.x > 10 && point.x < width - 10 && point.y > 98 && point.y < height - 48 &&
+    !covered.some(rect => point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom));
+  // On the first pick, prefer a point that the newly opened detail panel will
+  // leave visible. Subsequent picks use the panel's measured bounds above.
+  if (!selected && width > 760) {
+    const unobscured = candidates.filter(point => point.x < width - 365);
+    if (unobscured.length) candidates = unobscured;
+  }
+  if (!candidates.length) return false;
+  const node = candidates[Math.floor(Math.random() * candidates.length)].node;
+  selectNode(node, false, false);
+  $('detail').scrollTop = 0;
+  return true;
+}
 
 function resize() {
   width = innerWidth; height = innerHeight; dpr = Math.min(devicePixelRatio || 1, 2);
@@ -46,7 +113,8 @@ addEventListener('resize', resize); resize();
 function viewCenter() {
   const mobile = width <= 760;
   const left = mobile ? 0 : (width > 1700 ? 310 : width < 1000 ? 232 : 272);
-  const right = 25;
+  const detailRect = randomPick && selected && !mobile ? $('detail').getBoundingClientRect() : null;
+  const right = detailRect?.width ? Math.max(25, width - detailRect.left + 18) : 25;
   return { x: left + (width - left - right) / 2 + panX, y: height * .52 + panY,
     scale: Math.min(width - left - right, height - 230) * .00186 * zoom };
 }
@@ -84,6 +152,7 @@ function updateFilters() {
   $('filter-summary').textContent = active.length ? active.join(' / ') : msg('filters.all');
   $('announcement').textContent = msg('announcement.visible', {count: number(visible.size)});
   if (selected && !visible.has(selected.id)) closeDetail();
+  deferRandomPick();
   renderTags(); renderSearch(); updateConnectionCount(); needsRender = true;
 }
 
@@ -138,6 +207,7 @@ function renderSearch() {
 }
 
 function selectNode(node, pin = false, focus = false) {
+  if (pin || focus) stopRandomPick();
   const changed = selected?.id !== node.id;
   selected = node; pinned = pin; if (changed) fullText = false;
   document.body.classList.add('detail-visible'); $('detail').hidden = false;
@@ -151,7 +221,8 @@ function selectNode(node, pin = false, focus = false) {
   renderDetail(); if (focus) $('detail').querySelector('h2')?.focus({preventScroll:true}); needsRender = true;
 }
 
-function closeDetail() {
+function closeDetail(manual = false) {
+  if (manual) stopRandomPick();
   selected = null; hovered = null; pinned = false; hoveredCandidate=null;
   $('detail').hidden = true; $('hover-label').hidden = true;
   document.body.classList.remove('detail-visible'); needsRender = true;
@@ -168,8 +239,8 @@ function renderDetail() {
   const top=el('div','detail-top'), actions=el('div','detail-actions');
   top.append(el('span','',msg(pinned ? 'detail.pinned' : 'detail.preview')));
   const pin=el('button','',msg(pinned ? 'detail.unpin' : 'detail.pin')); pin.title=msg('detail.pinTitle');pin.dataset.action='pin';
-  pin.addEventListener('click',()=>{pinned=!pinned;renderDetail();});
-  const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',closeDetail);
+  pin.addEventListener('click',()=>{stopRandomPick();pinned=!pinned;renderDetail();needsRender=true;});
+  const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',()=>closeDetail(true));
   actions.append(pin,close);top.append(actions);const title=el('h2','',n.title);title.tabIndex=-1;box.append(top,title,el('div','detail-source',sourceLabel(n.source)));
   const tags=el('div','detail-tags');
   n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${t}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});box.append(tags);
@@ -177,7 +248,7 @@ function renderDetail() {
   box.append(el('p','detail-excerpt',excerpt || msg('detail.noText')));
   if (n.text && n.text.length > (n.excerpt || '').length + 80) {
     const toggle=el('button','detail-text-toggle',msg(fullText?'detail.hideText':'detail.readText'));
-    toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{fullText=!fullText;renderDetail();});box.append(toggle);
+    toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});box.append(toggle);
     if (fullText) box.append(el('div','full-text',cleanText(n.text)));
   }
   const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';box.append(link);
@@ -200,6 +271,7 @@ function renderDetail() {
 }
 
 function showHover(node, pos) {
+  if (randomPick) {hovered=null;$('hover-label').hidden=true;return;}
   if (!node) {hovered=null;$('hover-label').hidden=true;return;}
   const changed=hovered?.id!==node.id;hovered=node;
   const tip=$('hover-label');if(changed)tip.replaceChildren(document.createTextNode(node.title),el('small','',sourceLabel(node.source)));tip.hidden=false;
@@ -230,7 +302,9 @@ function draw(now) {
       const a=positions.get(edge.source),b=positions.get(edge.target);if(!a||!b)continue;
       const emphasis=selected&&(edge.source===selected.id||edge.target===selected.id);
       const within=a.node.cluster===b.node.cluster;
-      const alpha=emphasis ? .50 : selected ? .012 : edge.type==='link' ? (within?.09:.033) : (within?.037:.015);
+      const baseline = edge.type==='link' ? (within?.09:.033) : (within?.037:.015);
+      const randomBaseline = edge.type==='link' ? (within?.16:.095) : (within?.075:.038);
+      const alpha=emphasis ? .50 : randomPick ? randomBaseline : selected ? .012 : baseline;
       if (!emphasis && Math.hypot(a.x-b.x,a.y-b.y)>width*.45) continue;
       ctx.strokeStyle=`rgba(221,221,221,${alpha})`;ctx.lineWidth=emphasis?.65:.4;
       ctx.setLineDash(edge.type==='similarity'?[1,3]:[]);
@@ -241,7 +315,9 @@ function draw(now) {
   for(const p of projected) {
     const node=p.node, near=neighbors.has(node.id), active=selected?.id===node.id||hovered?.id===node.id;
     const depth=Math.max(.32,Math.min(1,p.perspective*.7));
-    const alpha=active ? 1 : near ? .9 : selected ? .19 : node.lowEvidence ? depth*.56 : depth;
+    const baseline = node.lowEvidence ? depth*.56 : depth;
+    const randomBaseline = node.lowEvidence ? Math.max(.32, depth*.68) : Math.max(.55, depth);
+    const alpha=active ? 1 : near ? .9 : randomPick ? randomBaseline : selected ? .19 : baseline;
     const importance=Math.min(1,Math.log1p(node.degree||0)/7);
     const radius=active?3.0:(.75+importance*.7)*Math.max(.65,Math.min(1.5,p.perspective));
     ctx.fillStyle=`rgba(239,239,239,${alpha})`;ctx.beginPath();ctx.arc(p.x,p.y,radius,0,Math.PI*2);ctx.fill();
@@ -281,6 +357,10 @@ function hitLabel(x,y){return labelHits.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r
 
 function animate(now) {
   const dt=Math.min(40,now-(frameTime||now));frameTime=now;
+  if (randomPick) {
+    if (randomPickingPaused(now) || !visible.size) nextRandomPick = now + RANDOM_PICK_INTERVAL;
+    else if (now >= nextRandomPick) {pickRandomNode();nextRandomPick = now + RANDOM_PICK_INTERVAL;}
+  }
   if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000012;needsRender=true;}
   const delta=Math.abs(targetYaw-yaw)+Math.abs(targetPitch-pitch)+Math.abs(targetZoom-zoom)+Math.abs(targetPanX-panX)+Math.abs(targetPanY-panY);
   if(delta>.0002){
@@ -317,7 +397,7 @@ function pointerEnd(e) {
   pointers.delete(e.pointerId);
   if(!pointers.size){
     if(click){const hit=hitNode(e.clientX,e.clientY);if(hit)selectNode(hit.node,true);
-      else{const label=hitLabel(e.clientX,e.clientY);if(label)chooseCluster(label.cluster.id);else closeDetail();}}
+      else{const label=hitLabel(e.clientX,e.clientY);if(label)chooseCluster(label.cluster.id);else closeDetail(true);}}
     dragState=null;pinchDistance=null;canvas.style.cursor='grab';
   }else{const[x]=[...pointers.values()];dragState={startX:x.x,startY:x.y,yaw:targetYaw,pitch:targetPitch,moved:true,panX:targetPanX,panY:targetPanY};pinchDistance=null;}
   needsRender=true;
@@ -328,8 +408,30 @@ canvas.addEventListener('pointerleave',()=>{if(dragState)return;pointerInside=fa
 canvas.addEventListener('wheel',e=>{e.preventDefault();targetZoom=Math.max(.42,Math.min(4,targetZoom*Math.exp(-e.deltaY*.001)));lastInteraction=performance.now();needsRender=true;},{passive:false});
 document.querySelectorAll('button,input,select,a,dialog').forEach(x=>x.addEventListener('pointerenter',()=>{pointerInside=false;hovered=null;$('hover-label').hidden=true;}));
 
-$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{searchQuery=normalize($('search').value.trim());updateFilters();},100);});
-$('tag-search').addEventListener('input',renderTags);
+// Guard the live detail DOM between pointer-down and click. Passive reading,
+// dialogs and dragging pause the cadence without changing its ON/OFF setting.
+document.addEventListener('pointerover',e=>{
+  const inside=!!randomPauseRegion(e.target);
+  if(inside!==randomUiPointer){randomUiPointer=inside;deferRandomPick();}
+},true);
+document.addEventListener('pointerout',e=>{
+  const inside=!!randomPauseRegion(e.relatedTarget);
+  if(inside!==randomUiPointer){randomUiPointer=inside;deferRandomPick();}
+},true);
+document.addEventListener('pointerdown',e=>{
+  randomPointerHeld=true;deferRandomPick();
+  if(e.target instanceof Element&&e.target.closest('#detail'))stopRandomPick();
+},true);
+for(const event of ['pointerup','pointercancel'])document.addEventListener(event,()=>{randomPointerHeld=false;deferRandomPick();},true);
+document.addEventListener('wheel',e=>{
+  if(e.target instanceof Element&&e.target.closest('#detail'))stopRandomPick();
+  else if(randomPauseRegion(e.target)){randomPauseUntil=performance.now()+750;deferRandomPick();}
+},{capture:true,passive:true});
+document.addEventListener('keydown',e=>{if(randomPauseRegion(e.target)){randomPauseUntil=performance.now()+750;deferRandomPick();}},true);
+document.addEventListener('visibilitychange',deferRandomPick);
+
+$('search').addEventListener('input',()=>{stopRandomPick();clearTimeout(searchTimer);searchTimer=setTimeout(()=>{searchQuery=normalize($('search').value.trim());updateFilters();},100);});
+$('tag-search').addEventListener('input',()=>{stopRandomPick();renderTags();});
 document.querySelectorAll('.source-filter').forEach(x=>x.addEventListener('change',()=>{if(x.checked)selectedSources.add(x.value);else selectedSources.delete(x.value);updateFilters();}));
 $('cluster-filter').addEventListener('change',()=>chooseCluster($('cluster-filter').value));
 function renderSubgroupOptions() {
@@ -351,6 +453,7 @@ $('reset-filters').addEventListener('click',resetFilters);$('empty-reset').addEv
 $('toggle-labels').addEventListener('click',e=>{showLabels=!showLabels;e.currentTarget.setAttribute('aria-pressed',String(showLabels));needsRender=true;});
 $('toggle-lines').addEventListener('click',e=>{showLines=!showLines;e.currentTarget.setAttribute('aria-pressed',String(showLines));needsRender=true;});
 $('toggle-motion').addEventListener('click',e=>{motion=!motion;e.currentTarget.setAttribute('aria-pressed',String(motion));needsRender=true;});
+$('toggle-random').addEventListener('click',()=>setRandomPick(!randomPick));
 $('similarity').addEventListener('input',()=>{similarity=Number($('similarity').value);$('similarity-value').textContent=similarity.toFixed(2);updateConnectionCount();needsRender=true;});
 $('zoom-in').addEventListener('click',()=>{targetZoom=Math.min(4,targetZoom*1.25);needsRender=true;});
 $('zoom-out').addEventListener('click',()=>{targetZoom=Math.max(.42,targetZoom/1.25);needsRender=true;});
@@ -363,7 +466,7 @@ addEventListener('keydown',e=>{
   if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){
     e.preventDefault();if(width<=760){$('filters').classList.add('mobile-open');$('mobile-filters').setAttribute('aria-expanded','true');}$('search').focus();
   }
-  if(e.key==='Escape'&&!$('about').open&&!$('trends').open){closeDetail();$('filters').classList.remove('mobile-open');$('mobile-filters').setAttribute('aria-expanded','false');}
+  if(e.key==='Escape'&&!$('about').open&&!$('trends').open){closeDetail(true);$('filters').classList.remove('mobile-open');$('mobile-filters').setAttribute('aria-expanded','false');}
 });
 
 function updateTagMode() {
@@ -450,12 +553,13 @@ async function init() {
     $('total-count').textContent=number(nodes.length);$('cluster-count').textContent=number(clusters.length);
     renderAbout();
     $('loading').hidden=true;updateFilters();
+    if(randomPick){pickRandomNode();deferRandomPick();}
     // Cluster labels always reflect the visible subset, without recomputing the established layout.
     const originalFilterHandler=()=>{for(const c of clusters)c.visibleCount=0;for(const n of nodes)if(visible.has(n.id)){const c=clusterMap.get(String(n.cluster));if(c)c.visibleCount++;}};
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
     try{const r=await fetch(new URL('trends.json', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
-    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
+    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval:RANDOM_PICK_INTERVAL,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
     $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent of References:',error);
