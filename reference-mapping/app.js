@@ -51,6 +51,7 @@ let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -10
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
 let randomPickInterval = 500;
+let rotationSpeed = 1.5;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
 document.body.classList.toggle('random-pick-active', randomPick);
 
@@ -62,6 +63,12 @@ function updateRandomInterval() {
   const seconds = (randomPickInterval / 1000).toFixed(1);
   $('random-interval-value').textContent = `${seconds} s`;
   $('random-interval').setAttribute('aria-valuetext', msg('controls.pickIntervalValue', {seconds}));
+}
+
+function updateRotationSpeed() {
+  const speed = rotationSpeed.toFixed(2).replace(/0$/, '');
+  $('rotation-speed-value').textContent = `${speed}×`;
+  $('rotation-speed').setAttribute('aria-valuetext', msg('controls.rotationSpeedValue', {speed}));
 }
 
 function setRandomPick(enabled) {
@@ -434,7 +441,7 @@ function animate(now) {
     if (randomPickingPaused(now) || !visible.size) nextRandomPick = now + randomPickInterval;
     else if (now >= nextRandomPick) {pickRandomNode();nextRandomPick = now + randomPickInterval;}
   }
-  if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000012;needsRender=true;}
+  if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000012*rotationSpeed;needsRender=true;}
   const delta=Math.abs(targetYaw-yaw)+Math.abs(targetPitch-pitch)+Math.abs(targetZoom-zoom)+Math.abs(targetPanX-panX)+Math.abs(targetPanY-panY);
   if(delta>.0002){
     const f=reducedMotion?1:Math.min(.30,dt*.013);
@@ -531,6 +538,10 @@ $('random-interval').addEventListener('input',()=>{
   randomPickInterval = Math.round(Number($('random-interval').value) * 1000);
   updateRandomInterval();deferRandomPick();
 });
+$('rotation-speed').addEventListener('input',()=>{
+  rotationSpeed = Number($('rotation-speed').value);
+  updateRotationSpeed();needsRender=true;
+});
 $('similarity').addEventListener('input',()=>{similarity=Number($('similarity').value);$('similarity-value').textContent=similarity.toFixed(2);updateConnectionCount();needsRender=true;});
 $('zoom-in').addEventListener('click',()=>{targetZoom=Math.min(4,targetZoom*1.25);needsRender=true;});
 $('zoom-out').addEventListener('click',()=>{targetZoom=Math.max(.42,targetZoom/1.25);needsRender=true;});
@@ -577,7 +588,7 @@ function setLanguage(next, persist=true) {
   }
   document.querySelectorAll('[data-locale]').forEach(button=>{button.setAttribute('aria-pressed',String(locale===button.dataset.locale));button.setAttribute('aria-label',msg(button.dataset.locale==='ja'?'static.jpAria':'static.enAria'));});
   document.querySelectorAll('.dialog-language-switch').forEach(group=>group.setAttribute('aria-label',msg('static.languageAria')));
-  updateTagMode();updateRandomInterval();renderClusterOptions();renderAbout();
+  updateTagMode();updateRandomInterval();updateRotationSpeed();renderClusterOptions();renderAbout();
   const detailScroll=$('detail').scrollTop,trendsScroll=$('trends').scrollTop;
   if(nodes.length)updateFilters();
   if(selected)renderDetail();
@@ -648,7 +659,7 @@ async function init() {
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
     try{const r=await fetch(new URL('trends.json?v=20261008-worldmaking', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
-    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
+    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,motion,rotationSpeed,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
     $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent References:',error);
