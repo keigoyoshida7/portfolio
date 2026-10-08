@@ -56,7 +56,7 @@ window.LatentReferenceLinks = (() => {
     return href ? {href, label: content} : null;
   }
 
-  function append(container, text, source) {
+  function append(container, text, source, displayLabel = label => label) {
     const doc = container.ownerDocument || document;
     const input = String(text ?? '');
     const fragment = doc.createDocumentFragment();
@@ -66,7 +66,7 @@ window.LatentReferenceLinks = (() => {
       const link = doc.createElement('a');
       link.className = 'reference-text-link';
       link.href = href;
-      link.textContent = label;
+      link.textContent = displayLabel(label);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       link.title = href;

@@ -1,6 +1,6 @@
 'use strict';
 
-// Interface copy is translated; source titles, tags and note text stay intact.
+// Interface copy is translated; titles and map labels have an editorial English layer.
 window.LatentI18n = {
   messages: {
     ja: {
@@ -98,6 +98,7 @@ window.LatentI18n = {
       'detail.readText': '本文の記録を読む ＋',
       'detail.hideText': '本文を閉じる',
       'detail.openOriginal': 'Scrapboxで開く ↗',
+      'about.language': 'ENではタイトル・群名を英語表記で表示します。ノート本文は原文で読めます。',
       'detail.nearby': '近傍のリファレンス',
       'detail.nearbyCluster': '{heading} / {label}',
       'detail.linked': '原文で接続 · {reason}',
@@ -236,6 +237,7 @@ window.LatentI18n = {
       'detail.readText': 'Read the full note ＋',
       'detail.hideText': 'Hide full text',
       'detail.openOriginal': 'Open in Scrapbox ↗',
+      'about.language': 'EN displays English titles and group names. Note text is available in its source language.',
       'detail.nearby': 'Nearby references',
       'detail.nearbyCluster': '{heading} / {label}',
       'detail.linked': 'Source connection · {reason}',

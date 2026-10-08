@@ -17,11 +17,22 @@ const msg = (key, params = {}) => {
   const messages = window.LatentI18n.messages;
   return String(messages[locale][key] ?? messages.ja[key] ?? key).replace(/\{(\w+)\}/g, (_, name) => String(params[name] ?? ''));
 };
-const clusterLabel = cluster => cluster?.lowEvidence ? msg('clusters.lowEvidence') : cluster?.label || msg('filters.selectedCluster');
-const reasonText = reason => locale === 'ja' ? reason : String(reason || '')
-  .replaceAll('題名・本文・タグ・参照の共有特徴', msg('reason.features'))
-  .replaceAll('共通タグ', msg('reason.tags')).replaceAll('共通参照', msg('reason.references'))
-  .replaceAll('原文リンク', msg('reason.originalLink'));
+let english = {titles: {}, clusters: {}, subgroups: {}, terms: {}}, englishLookup = new Map();
+const englishLabel = value => english.titles[value] || english.terms[value] || englishLookup.get(normalize(value)) || value;
+const referenceTitle = node => locale === 'en' ? englishLabel(node?.title || '') : node?.title || '';
+const tagLabel = tag => locale === 'en' ? englishLabel(tag) : tag;
+const clusterLabel = cluster => cluster?.lowEvidence ? msg('clusters.lowEvidence') :
+  (locale === 'en' ? english.clusters[cluster?.id] || english.subgroups[cluster?.id] || englishLabel(cluster?.label) : cluster?.label) || msg('filters.selectedCluster');
+const linkLabel = label => {
+  if (locale !== 'en') return label;
+  const crossProject = String(label).match(/^\/([^/]+)\/(.+)$/);
+  return crossProject ? `${sourceLabel(crossProject[1])} / ${englishLabel(crossProject[2])}` : englishLabel(label);
+};
+const reasonText = reason => locale === 'ja' ? reason : String(reason || '').split(' / ').map(part => {
+  if (part.startsWith('共通タグ ')) return msg('reason.tags') + ' ' + part.slice(5).split('・').map(tag => '#' + tagLabel(tag.replace(/^#/, ''))).join(' · ');
+  if (part.startsWith('共通参照 ')) return msg('reason.references') + ' ' + part.slice(5).split('・').map(englishLabel).join(' · ');
+  return part.replaceAll('題名・本文・タグ・参照の共有特徴', msg('reason.features')).replaceAll('原文リンク', msg('reason.originalLink'));
+}).join(' / ');
 let mapFailed = false, trendsFailure = '';
 
 let data, trends, nodes = [], edges = [], clusters = [], nodeMap = new Map(), clusterMap = new Map();
@@ -189,9 +200,9 @@ function renderTags() {
   const counts = new Map();
   nodes.forEach(n => { if (!selectedSources.has(n.source) || (selectedCluster && String(n.cluster) !== selectedCluster)) return;
     n.tags.forEach(t => counts.set(t, (counts.get(t) || 0) + 1)); });
-  const tags = [...counts].filter(([t]) => normalize(t).includes(q)).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+  const tags = [...counts].filter(([t]) => normalize(`${t} ${englishLabel(t)}`).includes(q)).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
   const make = (tag,count,isSelected) => {
-    const b = el('button','tag-button',`#${tag}`); b.dataset.tag=tag; b.setAttribute('aria-pressed',String(isSelected));
+    const b = el('button','tag-button',`#${tagLabel(tag)}`); b.dataset.tag=tag; b.setAttribute('aria-pressed',String(isSelected));
     b.append(el('small','',number(count))); b.addEventListener('click',() => toggleTag(tag)); return b;
   };
   [...selectedTags].forEach(t => { const b = make(t, counts.get(t) || 0, true); b.title = msg('tags.remove'); chosen.append(b); });
@@ -204,11 +215,11 @@ function renderSearch() {
   const out = $('search-results'); out.replaceChildren(); out.hidden = !searchQuery;
   if (!searchQuery) return;
   const matches = nodes.filter(n => visible.has(n.id)).sort((a,b) => {
-    const av = normalize(a.title).includes(searchQuery), bv = normalize(b.title).includes(searchQuery);
+    const av = normalize(`${a.title} ${englishLabel(a.title)}`).includes(searchQuery), bv = normalize(`${b.title} ${englishLabel(b.title)}`).includes(searchQuery);
     return Number(bv)-Number(av) || b.degree-a.degree;
   });
   matches.slice(0,24).forEach(n => {
-    const b=el('button','search-result',n.title); b.append(el('small','',sourceLabel(n.source)));
+    const b=el('button','search-result',referenceTitle(n)); b.append(el('small','',sourceLabel(n.source)));
     b.addEventListener('click',()=>selectNode(n,true,true)); out.append(b);
   });
   if (!matches.length) out.append(el('p','',msg('search.none')));
@@ -254,7 +265,7 @@ function renderDetail() {
   if (!selected) return;
   const restoreAction=document.activeElement?.dataset?.action;
   const n=selected, box=$('detail'); box.replaceChildren();
-  const compact=updateDetailMode(), title=el('h2','',n.title);title.tabIndex=-1;
+  const compact=updateDetailMode(), title=el('h2','',referenceTitle(n));title.tabIndex=-1;
   const content=el('div','detail-body');content.id='detail-body';
   if (compact) {
     const expand=el('button','detail-expand',msg('detail.expand'));expand.dataset.action='expand';
@@ -278,20 +289,20 @@ function renderDetail() {
   const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',()=>closeDetail(true));
   actions.append(pin,close);top.append(actions);box.append(top,title,content);content.append(el('div','detail-source',sourceLabel(n.source)));
   const tags=el('div','detail-tags');
-  n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${t}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});content.append(tags);
+  n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${tagLabel(t)}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});content.append(tags);
   const excerpt=String(n.excerpt || '').trim(), text=noteBody(n), preview=el('p','detail-excerpt');
-  window.LatentReferenceLinks.append(preview,excerpt || msg('detail.noText'),n.source);content.append(preview);
+  window.LatentReferenceLinks.append(preview,excerpt || msg('detail.noText'),n.source,linkLabel);content.append(preview);
   if (text && text !== excerpt) {
     const toggle=el('button','detail-text-toggle',msg(fullText?'detail.hideText':'detail.readText'));
     toggle.dataset.action='full-text';toggle.addEventListener('click',()=>{stopRandomPick();fullText=!fullText;renderDetail();});content.append(toggle);
-    if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source);content.append(body);}
+    if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
   }
   const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
   const cluster=clusterMap.get(String(n.cluster));
   const heading=el('h3','',msg('detail.nearby')+(cluster ? ' / '+clusterLabel(cluster) : ''));content.append(heading);
   const neighbors=(n.neighbors || []).filter(v=>nodeMap.has(v.id));
   neighbors.slice(0,8).forEach(v=>{
-    const target=nodeMap.get(v.id), b=el('button','neighbor',target.title);
+    const target=nodeMap.get(v.id), b=el('button','neighbor',referenceTitle(target));
     b.append(el('small','',msg(v.type==='link'?'detail.linked':'detail.similarity',{score:Number(v.weight).toFixed(2),reason:reasonText(v.reason || sourceLabel(target.source))})));
     b.addEventListener('click',()=>{
       if (!visible.has(target.id)) { resetFilters(); }
@@ -309,7 +320,7 @@ function showHover(node, pos) {
   if (randomPick) {hovered=null;$('hover-label').hidden=true;return;}
   if (!node) {hovered=null;$('hover-label').hidden=true;return;}
   const changed=hovered?.id!==node.id;hovered=node;
-  const tip=$('hover-label');if(changed)tip.replaceChildren(document.createTextNode(node.title),el('small','',sourceLabel(node.source)));tip.hidden=false;
+  const tip=$('hover-label');if(changed)tip.replaceChildren(document.createTextNode(referenceTitle(node)),el('small','',sourceLabel(node.source)));tip.hidden=false;
   tip.style.left=`${Math.min(width-265,Math.max(12,pos.x+14))}px`;
   tip.style.top=`${Math.max(105,Math.min(height-110,pos.y-23))}px`;
   if (!pinned && selected?.id!==node.id) selectNode(node,false);
@@ -472,7 +483,7 @@ $('cluster-filter').addEventListener('change',()=>chooseCluster($('cluster-filte
 function renderSubgroupOptions() {
   const select=$('subgroup-filter');select.replaceChildren(el('option','',msg('subgroups.all')));select.firstChild.value='';
   const children=(data?.subgroups||[]).filter(c=>String(c.parent)===selectedCluster);
-  select.hidden=children.length<2;children.forEach(c=>{const o=el('option','',`${clusterLabel(c).slice(0,36)} (${number(c.count)})`);o.value=c.id;select.append(o);});
+  select.hidden=children.length<2;children.forEach(c=>{const o=el('option','',`${clusterLabel(c)} (${number(c.count)})`);o.value=c.id;select.append(o);});
   select.value=selectedSubgroup;
 }
 function renderClusterOptions() {
@@ -514,7 +525,7 @@ function updateTagMode() {
 }
 
 function renderAbout() {
-  $('method-details').replaceChildren(el('p','',msg('about.method1')),el('p','',msg('about.method2')));
+  $('method-details').replaceChildren(el('p','',msg('about.method1')),el('p','',msg('about.method2')),el('p','fine-print',msg('about.language')));
   if (!data) return;
   const date=new Date(data.metadata?.capturedAt||data.metadata?.generatedAt||'2026-10-08');
   $('snapshot-date').textContent=msg('snapshot.label',{date:Number.isNaN(date.valueOf())?'2026.10.08':date.toLocaleDateString('sv-SE').replaceAll('-','.')});
@@ -526,7 +537,9 @@ function setLanguage(next, persist=true) {
   locale=next;
   if (persist) { try {localStorage.setItem('latent-reference-language',locale);} catch {} }
   document.documentElement.lang=locale;
-  document.title='Latent References | Keigo Yoshida | 吉田慧悟';
+  document.title=locale === 'en' ? 'Latent References | Keigo Yoshida' : 'Latent References | 吉田慧悟 / Keigo Yoshida';
+  document.querySelector('.author-credit > a:last-child').textContent=locale === 'en' ? 'Keigo Yoshida' : '吉田慧悟 / Keigo Yoshida';
+  hovered=null;$('hover-label').hidden=true;
   document.querySelector('meta[name="description"]').content=msg('static.description');
   for (const binding of window.LatentI18n.static) {
     document.querySelectorAll(binding.selector).forEach(node=>{
@@ -560,16 +573,17 @@ function renderTrends() {
     const share=Number(t.share)>1?Number(t.share):Number(t.share)*100;
     heading.append(el('span','',clusterLabel(clusterMap.get(String(t.cluster)))),el('small','',`${number(t.count)} / ${share.toFixed(1)}%`));
     const bar=el('span','theme-bar'),fill=el('i');fill.style.width=`${t.count/max*100}%`;bar.append(fill);
-    const representativeTitles=(clusterMap.get(String(t.cluster))?.representatives||[]).map(id=>nodeMap.get(id)?.title).filter(Boolean);
-    b.append(heading,bar,el('span','theme-terms',(representativeTitles.length?representativeTitles.slice(0,3):(t.terms||[]).slice(0,5)).join(' · ')));
+    const representativeTitles=(clusterMap.get(String(t.cluster))?.representatives||[]).map(id=>referenceTitle(nodeMap.get(id))).filter(Boolean);
+    const fallbackTerms=(t.terms||[]).map(term=>locale==='en'?englishLabel(term):term).filter(term=>locale!=='en'||!/[\u3040-\u30ff\u3400-\u9fff]/u.test(term));
+    b.append(heading,bar,el('span','theme-terms',(representativeTitles.length?representativeTitles.slice(0,3):fallbackTerms.slice(0,5)).join(' · ')));
     if(t.sources){const values=(trends.sources||[]).map(s=>`${sourceLabel(s.name)} ${((t.sources[s.name]||0)/Math.max(1,s.count)*100).toFixed(1)}%`);b.append(el('span','source-percent',values.join(' · ')+' / '+msg('trends.themeShareSuffix')));}
     b.addEventListener('click',()=>{$('trends').close();resetFilters();chooseCluster(t.cluster);});themes.append(b);
   });box.append(themes);
   const bridges=el('section','trend-section');bridges.append(el('h3','',msg('trends.bridges')),el('p','trend-subtitle',msg('trends.bridgesSubtitle')));
-  (trends.bridges||[]).slice(0,6).forEach(b=>{const button=el('button','bridge-row',b.title);button.append(el('small','',msg('trends.connections',{clusters:number(b.clusterCount),connections:number(b.degree)})));
+  (trends.bridges||[]).slice(0,6).forEach(b=>{const button=el('button','bridge-row',referenceTitle(nodeMap.get(b.id)||b));button.append(el('small','',msg('trends.connections',{clusters:number(b.clusterCount),connections:number(b.degree)})));
     button.addEventListener('click',()=>{$('trends').close();resetFilters();const node=nodeMap.get(b.id);if(node)selectNode(node,true,true);});bridges.append(button);});box.append(bridges);
   if(trends.tags?.length){const section=el('section','trend-section');section.append(el('h3','',msg('trends.tags')));const tags=el('div','trends-tags');
-    trends.tags.slice(0,20).forEach(t=>{const b=el('button','',`#${t.tag} · ${number(t.count)}`);b.addEventListener('click',()=>{$('trends').close();resetFilters();toggleTag(t.tag);});tags.append(b);});section.append(tags);box.append(section);}
+    trends.tags.slice(0,20).forEach(t=>{const b=el('button','',`#${tagLabel(t.tag)} · ${number(t.count)}`);b.addEventListener('click',()=>{$('trends').close();resetFilters();toggleTag(t.tag);});tags.append(b);});section.append(tags);box.append(section);}
   if(trends.activity?.length){const section=el('section','trend-section');section.append(el('h3','',msg('trends.activity')),el('p','trend-subtitle',msg('trends.activitySubtitle')));
     const activity=trends.activity.slice(-48),maxCount=Math.max(1,...activity.map(v=>v.count)),chart=el('div','activity-chart');chart.setAttribute('role','img');chart.setAttribute('aria-label',msg('trends.activityAria'));
     activity.forEach(v=>{const bar=el('div','activity-month');bar.style.height=`${Math.max(1,v.count/maxCount*88)}px`;bar.title=msg('trends.activityMonth',{month:v.month,count:number(v.count)});bar.tabIndex=0;bar.setAttribute('aria-label',bar.title);chart.append(bar);});
@@ -579,12 +593,15 @@ function renderTrends() {
 
 async function init() {
   try {
-    const response=await fetch(new URL('mapping.json', assetBase));if(!response.ok)throw new Error(`HTTP ${response.status}`);data=await response.json();
+    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json', assetBase)),fetch(new URL('titles-en.json?v=20261008-english',assetBase))]);
+    if(!response.ok||!translationResponse.ok)throw new Error('Reference data could not be loaded');
+    [data,english]=await Promise.all([response.json(),translationResponse.json()]);
+    englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
     nodes=data.nodes||[];edges=data.edges||[];clusters=data.clusters||[];
     if(!nodes.length)throw new Error(msg('error.emptyArchive'));
     const radii=nodes.map(n=>Math.hypot(...n.position)).sort((a,b)=>a-b);
     const radius=radii[Math.floor(radii.length*.94)] || 1;const scale=345/Math.max(1,radius);
-    for(const n of nodes){n.position=n.position.map(v=>v*scale);n.tags=n.tags||[];n.neighbors=n.neighbors||[];n.search=normalize(`${n.title}\n${n.text||n.excerpt||''}\n${n.tags.join(' ')}`);nodeMap.set(n.id,n);}
+    for(const n of nodes){n.position=n.position.map(v=>v*scale);n.tags=n.tags||[];n.neighbors=n.neighbors||[];n.search=normalize(`${n.title}\n${englishLabel(n.title)}\n${n.text||n.excerpt||''}\n${n.tags.map(t=>`${t} ${englishLabel(t)}`).join(' ')}`);nodeMap.set(n.id,n);}
     for(const c of clusters){c.position=(c.position||[0,0,0]).map(v=>v*scale);c.visibleCount=c.count;clusterMap.set(String(c.id),c);}
     renderClusterOptions();
     const counts={};nodes.forEach(n=>counts[n.source]=(counts[n.source]||0)+1);
@@ -598,7 +615,7 @@ async function init() {
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
     try{const r=await fetch(new URL('trends.json', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
-    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
+    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
     $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent References:',error);
