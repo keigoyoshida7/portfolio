@@ -50,7 +50,7 @@ let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags 
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
-let randomPickInterval = 500;
+let randomPickInterval = 50;
 let rotationSpeed = 1.5;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
 document.body.classList.toggle('random-pick-active', randomPick);
@@ -60,7 +60,7 @@ function deferRandomPick() {
 }
 
 function updateRandomInterval() {
-  const seconds = (randomPickInterval / 1000).toFixed(2).replace(/0$/, '');
+  const seconds = (randomPickInterval / 1000).toFixed(3).replace(/0{1,2}$/, '');
   $('random-interval-value').textContent = `${seconds} s`;
   $('random-interval').setAttribute('aria-valuetext', msg('controls.pickIntervalValue', {seconds}));
 }
