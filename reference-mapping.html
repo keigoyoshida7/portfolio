@@ -112,7 +112,7 @@
 }
   </script>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./reference-mapping/style.css?v=20261009-expand">
+  <link rel="stylesheet" href="./reference-mapping/style.css?v=20261009-header">
   <script src="./reference-mapping/i18n.js?v=20261009-expand" defer></script>
   <script src="./reference-mapping/links.js?v=20261008-topics" defer></script>
   <script src="./reference-mapping/app.js?v=20261009-expand" defer></script>
@@ -124,7 +124,7 @@
   <header class="masthead">
     <h1 class="wordmark-title"><a class="wordmark" href="./"><span>Latent References</span><small>reference-mapping</small></a></h1>
     <div id="header-note" class="header-note">思考の地形を、辿る。</div>
-    <button id="mobile-filters" class="text-button mobile-only" aria-expanded="false" aria-controls="filters">絞り込み ＋</button>
+    <div class="header-start"><a id="home-link" class="home-link text-button" href="https://keigoyoshida.jp/" aria-label="Return to Home">← Home</a><button id="mobile-filters" class="text-button mobile-only" aria-expanded="false" aria-controls="filters">絞り込み ＋</button></div>
     <nav class="header-nav"><button id="trends-open" class="text-button"><span id="trends-label">思考の傾向</span> <span>↗</span></button><button id="about-open" class="text-button"><span id="about-label">この地図について</span> <span>↗</span></button></nav>
     <div id="language-switch" class="language-switch" role="group" aria-label="表示言語"><button id="lang-en" data-locale="en" lang="en" aria-label="English" aria-pressed="true">EN</button><span aria-hidden="true">/</span><button id="lang-jp" data-locale="ja" lang="ja" aria-label="日本語" aria-pressed="false">JP</button></div>
   </header>
@@ -153,7 +153,7 @@
     <button id="reset-filters" class="reset-button"><span id="reset-label">絞り込みを解除</span> <span>↺</span></button>
   </aside>
   <main class="map-space" aria-label="マップの操作">
-    <div class="author-credit"><a id="home-link" class="home-link" href="https://keigoyoshida.jp/" aria-label="Return to Home">← Home</a><a id="curator-link" href="https://keigoyoshida.jp/greeting.html">吉田慧悟 / Keigo Yoshida</a><a id="quick-index-link" class="quick-index-link" href="./reference-index.html">Index ↗</a></div>
+    <div class="author-credit"><a id="curator-link" href="https://keigoyoshida.jp/greeting.html">吉田慧悟 / Keigo Yoshida</a><a id="quick-index-link" class="quick-index-link" href="./reference-index.html">Index ↗</a></div>
     <div id="loading" class="loading"><span class="loading-orbit"></span><span id="loading-label">思考の地形を読み込んでいます</span></div>
     <div id="empty" class="empty-state" hidden><h2 id="empty-title">該当する点がありません。</h2><p id="empty-description">言葉やタグ、出典の選択を変えてみてください。</p><button id="empty-reset" class="text-button">すべての点を表示 ↗</button></div>
     <div id="hover-label" class="hover-label" hidden></div>
