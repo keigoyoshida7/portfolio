@@ -291,6 +291,16 @@ function renderDetail() {
   pin.addEventListener('click',()=>{stopRandomPick();pinned=!pinned;renderDetail();needsRender=true;});
   const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',()=>closeDetail(true));
   actions.append(pin,close);top.append(actions);box.append(top,title,content);content.append(el('div','detail-source',sourceLabel(n.source)));
+  const cluster=clusterMap.get(String(n.cluster));
+  if (n.topicReview && cluster?.reviewed) {
+    const review=el('section','topic-review');
+    review.append(el('h3','',msg('detail.reviewedTheme',{label:clusterLabel(cluster)})),el('p','fine-print',n.topicReview.basis[locale]));
+    const related=el('div','detail-tags');
+    (cluster.relatedClusters||[]).forEach(id=>{const region=clusterMap.get(id);if(!region)return;
+      const button=el('button','',clusterLabel(region));button.title=msg('detail.relatedRegion');
+      button.addEventListener('click',()=>{stopRandomPick();resetFilters();chooseCluster(id);});related.append(button);});
+    review.append(related);content.append(review);
+  }
   const tags=el('div','detail-tags');
   n.tags.slice(0,15).forEach(t=>{const b=el('button','',`#${tagLabel(t)}`); b.addEventListener('click',()=>toggleTag(t)); tags.append(b);});content.append(tags);
   const excerpt=String(n.excerpt || '').trim(), text=noteBody(n), preview=el('p','detail-excerpt');
@@ -301,7 +311,13 @@ function renderDetail() {
     if (fullText) {const body=el('div','full-text');window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
   }
   const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
-  const cluster=clusterMap.get(String(n.cluster));
+  const topicNeighbors=(n.themeNeighbors||[]).filter(id=>nodeMap.has(id));
+  if(topicNeighbors.length){
+    content.append(el('h3','',msg('detail.sameTheme')));
+    topicNeighbors.forEach(id=>{const target=nodeMap.get(id),button=el('button','neighbor',referenceTitle(target));
+      button.append(el('small','',msg('detail.themeRelationship',{label:clusterLabel(cluster)})));
+      button.addEventListener('click',()=>{if(!visible.has(id))resetFilters();selectNode(target,true,true);});content.append(button);});
+  }
   const heading=el('h3','',msg('detail.nearby')+(cluster ? ' / '+clusterLabel(cluster) : ''));content.append(heading);
   const neighbors=(n.neighbors || []).filter(v=>nodeMap.has(v.id));
   neighbors.slice(0,8).forEach(v=>{
@@ -342,7 +358,7 @@ function draw(now) {
     projected.push(p);positions.set(node.id,p);
   }
   projected.sort((a,b)=>b.z-a.z);
-  const neighbors=new Set(selected ? [selected.id,...selected.neighbors.map(n=>n.id)] : []);
+  const neighbors=new Set(selected ? [selected.id,...selected.neighbors.map(n=>n.id),...(selected.themeNeighbors||[])] : []);
   if (showLines) {
     ctx.lineWidth=.45;
     // Each faint trace corresponds to a real graph edge; no decorative points or edges.
@@ -532,6 +548,8 @@ function updateTagMode() {
 function renderAbout() {
   $('method-details').replaceChildren(el('p','',msg('about.method1')),el('p','',msg('about.method2')),el('p','',msg('about.threshold')),el('p','fine-print',msg('about.language')));
   if (!data) return;
+  const review=data.metadata?.topicReview;
+  if(review)$('method-details').append(el('p','',msg('about.topicReview',{reviewed:number(review.reviewedPages),grouped:number(review.groupedPages),groups:number(review.groups),remaining:number(review.unresolvedPages)})));
   const date=new Date(data.metadata?.capturedAt||data.metadata?.generatedAt||'2026-10-08');
   $('snapshot-date').textContent=msg('snapshot.label',{date:Number.isNaN(date.valueOf())?'2026.10.08':date.toLocaleDateString('sv-SE').replaceAll('-','.')});
   $('snapshot-info').textContent=msg('snapshot.info',{count:number(nodes.length)});
@@ -594,11 +612,12 @@ function renderTrends() {
     activity.forEach(v=>{const bar=el('div','activity-month');bar.style.height=`${Math.max(1,v.count/maxCount*88)}px`;bar.title=msg('trends.activityMonth',{month:v.month,count:number(v.count)});bar.tabIndex=0;bar.setAttribute('aria-label',bar.title);chart.append(bar);});
     const axis=el('div','activity-axis');axis.append(el('span','',activity[0].month),el('span','',activity.at(-1).month));section.append(chart,axis);box.append(section);}
   for(const key of ['trends.noteThemes','trends.noteLowEvidence'])box.append(el('p','fine-print trends-note',msg(key)));
+  if(data.metadata?.topicReview)box.append(el('p','fine-print trends-note',msg('trends.noteTopicReview')));
 }
 
 async function init() {
   try {
-    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-dense', assetBase)),fetch(new URL('titles-en.json?v=20261008-english',assetBase))]);
+    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-topics', assetBase)),fetch(new URL('titles-en.json?v=20261008-topics',assetBase))]);
     if(!response.ok||!translationResponse.ok)throw new Error('Reference data could not be loaded');
     [data,english]=await Promise.all([response.json(),translationResponse.json()]);
     englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
@@ -619,7 +638,7 @@ async function init() {
     const originalFilterHandler=()=>{for(const c of clusters)c.visibleCount=0;for(const n of nodes)if(visible.has(n.id)){const c=clusterMap.get(String(n.cluster));if(c)c.visibleCount++;}};
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
-    try{const r=await fetch(new URL('trends.json', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
+    try{const r=await fetch(new URL('trends.json?v=20261008-topics', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
     window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));

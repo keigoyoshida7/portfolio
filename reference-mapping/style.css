@@ -56,3 +56,8 @@
   body.random-pick-active .view-tools button{min-height:24px;padding:4px 0}
   body.random-pick-active .camera-tools{right:0;bottom:var(--random-control-bottom)}
 }
+
+.topic-review{margin:20px 0;padding:12px 0;border-top:1px solid #252525;border-bottom:1px solid #252525}
+.topic-review h3{margin:0 0 10px;font-size:12px;line-height:1.6}
+.topic-review p{margin:0 0 12px;line-height:1.7}
+.topic-review .detail-tags{margin:0}
