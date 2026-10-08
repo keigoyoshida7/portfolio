@@ -26,3 +26,13 @@
 .view-tools,.similarity-control,.map-instructions{background-color:rgba(5,5,5,.82)}@media(min-width:761px) and (max-width:1250px){.detail-visible .map-legend,.detail-visible .compass{display:none}}
 
 @media(min-width:600px) and (max-width:760px) and (max-height:480px){.detail-visible .camera-tools{right:calc(38vw + 18px);bottom:5px}}
+
+.range-controls{position:absolute;left:34px;bottom:99px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;pointer-events:auto;background:rgba(5,5,5,.82)}
+.range-controls .similarity-control,.range-controls .random-interval-control{position:static;top:auto;bottom:auto;display:flex;align-items:center;gap:10px;margin:0;padding:0;font-size:9px;line-height:1.5;color:#777;background:transparent}
+.range-controls input{appearance:none;width:93px;height:1px;background:#3e3e3e;cursor:pointer;margin:0}
+.range-controls input::-webkit-slider-thumb{appearance:none;width:5px;height:9px;background:#bbb}
+.range-controls input::-moz-range-thumb{border:0;border-radius:0;width:5px;height:9px;background:#bbb}
+.range-controls output{font:9px Georgia,serif;color:#999;min-width:30px}
+.range-controls label>span{min-width:86px}
+@media(max-width:760px){.range-controls{left:22px;bottom:100px;gap:14px}.range-controls .similarity-control,.range-controls .random-interval-control{font-size:8px;gap:8px}.range-controls input{width:68px}.range-controls label>span{min-width:76px}.detail-visible .range-controls{top:84px;bottom:auto}}
+@media(max-width:599px) and (max-height:480px){.detail{max-height:max(25px,calc(100dvh - 300px))}}

@@ -34,11 +34,17 @@ let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags 
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
-const RANDOM_PICK_INTERVAL = 500;
+let randomPickInterval = 500;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
 
 function deferRandomPick() {
-  nextRandomPick = performance.now() + RANDOM_PICK_INTERVAL;
+  nextRandomPick = performance.now() + randomPickInterval;
+}
+
+function updateRandomInterval() {
+  const seconds = (randomPickInterval / 1000).toFixed(1);
+  $('random-interval-value').textContent = `${seconds} s`;
+  $('random-interval').setAttribute('aria-valuetext', msg('controls.pickIntervalValue', {seconds}));
 }
 
 function setRandomPick(enabled) {
@@ -75,7 +81,7 @@ function randomPickingPaused(now) {
 }
 
 function randomCandidateRects() {
-  const selectors = '#filters, #detail, .masthead, .view-tools, .camera-tools, .similarity-control, .statusbar, dialog[open]';
+  const selectors = '#filters, #detail, .masthead, .view-tools, .camera-tools, .range-controls, .statusbar, dialog[open]';
   return [...document.querySelectorAll(selectors)].filter(element => !element.hidden && element.getClientRects().length)
     .map(element => element.getBoundingClientRect()).filter(rect => rect.width > 0 && rect.height > 0);
 }
@@ -358,8 +364,8 @@ function hitLabel(x,y){return labelHits.find(r=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r
 function animate(now) {
   const dt=Math.min(40,now-(frameTime||now));frameTime=now;
   if (randomPick) {
-    if (randomPickingPaused(now) || !visible.size) nextRandomPick = now + RANDOM_PICK_INTERVAL;
-    else if (now >= nextRandomPick) {pickRandomNode();nextRandomPick = now + RANDOM_PICK_INTERVAL;}
+    if (randomPickingPaused(now) || !visible.size) nextRandomPick = now + randomPickInterval;
+    else if (now >= nextRandomPick) {pickRandomNode();nextRandomPick = now + randomPickInterval;}
   }
   if(motion&&!dragState&&now-lastInteraction>1300){targetYaw+=dt*.000012;needsRender=true;}
   const delta=Math.abs(targetYaw-yaw)+Math.abs(targetPitch-pitch)+Math.abs(targetZoom-zoom)+Math.abs(targetPanX-panX)+Math.abs(targetPanY-panY);
@@ -454,6 +460,10 @@ $('toggle-labels').addEventListener('click',e=>{showLabels=!showLabels;e.current
 $('toggle-lines').addEventListener('click',e=>{showLines=!showLines;e.currentTarget.setAttribute('aria-pressed',String(showLines));needsRender=true;});
 $('toggle-motion').addEventListener('click',e=>{motion=!motion;e.currentTarget.setAttribute('aria-pressed',String(motion));needsRender=true;});
 $('toggle-random').addEventListener('click',()=>setRandomPick(!randomPick));
+$('random-interval').addEventListener('input',()=>{
+  randomPickInterval = Math.round(Number($('random-interval').value) * 1000);
+  updateRandomInterval();deferRandomPick();
+});
 $('similarity').addEventListener('input',()=>{similarity=Number($('similarity').value);$('similarity-value').textContent=similarity.toFixed(2);updateConnectionCount();needsRender=true;});
 $('zoom-in').addEventListener('click',()=>{targetZoom=Math.min(4,targetZoom*1.25);needsRender=true;});
 $('zoom-out').addEventListener('click',()=>{targetZoom=Math.max(.42,targetZoom/1.25);needsRender=true;});
@@ -496,7 +506,7 @@ function setLanguage(next, persist=true) {
   }
   document.querySelectorAll('[data-locale]').forEach(button=>{button.setAttribute('aria-pressed',String(locale===button.dataset.locale));button.setAttribute('aria-label',msg(button.dataset.locale==='ja'?'static.jpAria':'static.enAria'));});
   document.querySelectorAll('.dialog-language-switch').forEach(group=>group.setAttribute('aria-label',msg('static.languageAria')));
-  updateTagMode();renderClusterOptions();renderAbout();
+  updateTagMode();updateRandomInterval();renderClusterOptions();renderAbout();
   const detailScroll=$('detail').scrollTop,trendsScroll=$('trends').scrollTop;
   if(nodes.length)updateFilters();
   if(selected)renderDetail();
@@ -559,7 +569,7 @@ async function init() {
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
     try{const r=await fetch(new URL('trends.json', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
-    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval:RANDOM_PICK_INTERVAL,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
+    window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:p.node.title,x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
     $('announcement').textContent=msg('error.mapAnnouncement');console.error('Latent References:',error);
