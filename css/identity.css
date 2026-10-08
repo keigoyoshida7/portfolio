@@ -41,8 +41,16 @@
   text-underline-offset: 4px;
 }
 
+.home header {
+  margin-bottom: 32px;
+}
+
+.home .artist-intro .artist-name {
+  margin-bottom: 0;
+}
+
 .home .artist-intro + section {
-  margin-top: 64px;
+  margin-top: 24px;
 }
 
 .contact-identity {
@@ -70,7 +78,11 @@
     font-size: 16px;
   }
 
+  .home header {
+    margin-bottom: 24px;
+  }
+
   .home .artist-intro + section {
-    margin-top: 48px;
+    margin-top: 20px;
   }
 }
