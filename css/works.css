@@ -119,7 +119,7 @@
   }
 
   .works-header .works-nav {
-    gap: 22px;
+    gap: clamp(12px, 4vw, 22px);
     font-size: 11px;
   }
 
