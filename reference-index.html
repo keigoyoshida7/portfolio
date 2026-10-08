@@ -102,8 +102,9 @@
 <section id="method"><h2>配置の方法 / Mapping method</h2>
 <p>題名・本文の日本語 2–5 文字 n-gram と英語単語の TF-IDF に、実際のタグ・共通参照の特徴を合わせ、コサイン類似度を計算します。原典内の直接リンクと類似度からグラフを作り、Louvain による群分けと階層的な三次元の力学配置を行っています。群内の細分には 64 次元 SVD と k-means を使います。</p>
 <p lang="en" class="english">The graph combines actual source links with cosine similarity over TF-IDF features from titles, text, tags and shared references. Japanese character n-grams and English words support matching across the archive. Louvain communities and a hierarchical 3D force layout position the groups; 64-dimensional SVD and k-means refine subgroups.</p>
-<p>49 群・60 細分・45 タグ。収録範囲内の直接リンクは 24 本、計算された類似関係は 7,397 本です。画面上の関係線は、設定した類似度の下限で絞り込まれます。</p>
-<p lang="en" class="english">49 groups, 60 subgroups and 45 tags. The snapshot contains 24 direct links within the archive and 7,397 computed similarity connections. The map displays connections according to the selected similarity threshold.</p>
+<p>49 群・60 細分・45 タグ。配置に用いたグラフでは、収録範囲内の直接リンクは 24 本、計算された類似関係は 7,397 本です。画面上の関係線は、設定した類似度の下限で絞り込まれます。</p>
+<p lang="en" class="english">49 groups, 60 subgroups and 45 tags. The layout graph contains 24 direct links within the archive and 7,397 computed similarity connections. The map displays connections according to the selected similarity threshold.</p>
+<p>表示用の類似線はさらに弱い関係を含めて、参照線と合わせ最大 24,289 本あります。下限の初期値は0.02、0まで下げられます。点と群の配置、傾向の集計には元のグラフを使います。</p><p lang="en" class="english">The display includes weaker similarities, with up to 24,289 connections including source links. The initial threshold is 0.02 and can be lowered to 0. The original graph determines point and group positions and the pattern analysis.</p>
 <p>「思考の傾向」は保存されたノートの分布とつながり方を表します。語彙の類似は哲学的な意味の同一性を保証しません。参照・類似の情報が少ないノートは別の領域に置き、確かな共通テーマの群として扱いません。画像内の文字は OCR していません。</p>
 <p lang="en" class="english">Patterns of thought describe the distribution and connections of archived material. Lexical similarity does not establish identical meaning. Notes with little relationship evidence occupy a separate region. Text inside images is not extracted with OCR.</p>
 <p class="small">Captured 2026-10-08 · <a href="https://keigoyoshida.jp/reference-mapping/mapping.json">配置データ / Mapping data (JSON)</a></p>

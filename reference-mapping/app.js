@@ -40,13 +40,14 @@ let width = innerWidth, height = innerHeight, dpr = Math.min(devicePixelRatio ||
 let yaw = -.29, pitch = -.13, zoom = 1, panX = 0, panY = 0;
 let targetYaw = yaw, targetPitch = pitch, targetZoom = zoom, targetPanX = 0, targetPanY = 0;
 let visible = new Set(), projected = [], labelHits = [], selected = null, hovered = null, pinned = false;
-let showLabels = true, showLines = true, motion = true, randomPick = true, similarity = .05, tagMode = 'OR';
+let showLabels = true, showLines = true, motion = true, randomPick = true, similarity = .02, tagMode = 'OR';
 let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
 let randomPickInterval = 500;
 let nextRandomPick = 0, randomUiPointer = false, randomPointerHeld = false, randomPauseUntil = 0;
+document.body.classList.toggle('random-pick-active', randomPick);
 
 function deferRandomPick() {
   nextRandomPick = performance.now() + randomPickInterval;
@@ -60,6 +61,7 @@ function updateRandomInterval() {
 
 function setRandomPick(enabled) {
   randomPick = enabled;
+  document.body.classList.toggle('random-pick-active', randomPick);
   $('toggle-random').setAttribute('aria-pressed', String(randomPick));
   pointerInside = false; hovered = null; hoveredCandidate = null; $('hover-label').hidden = true;
   if (randomPick) {
@@ -371,6 +373,7 @@ function draw(now) {
   }
   if(showLabels) {
     const placed=[];
+    const labelObstacles=randomPick&&width<=760 ? [...document.querySelectorAll('.view-tools,.range-controls,.camera-tools')].map(element=>element.getBoundingClientRect()) : [];
     ctx.font=`10px ${fontFamily}`;ctx.textAlign='left';
     for(const c of clusters.filter(c=>c.visibleCount>0).sort((a,b)=>b.visibleCount-a.visibleCount)) {
       const p=project(c.position,center), text=clusterLabel(c);
@@ -378,6 +381,7 @@ function draw(now) {
       const x=p.x-w/2, y=p.y+19;
       if(x<280&&width>760||x<12||x+w>width-30||y<140||y>height-155)continue;
       if(selected&&width>760&&x+w>width-350)continue;
+      if(labelObstacles.some(rect=>x-7<rect.right&&x+w+27>rect.left&&y-13<rect.bottom&&y+5>rect.top))continue;
       if(placed.some(r=>Math.abs(r.y-y)<28&&x<r.x+r.w+22&&x+w+22>r.x))continue;
       const focus=selectedCluster===String(c.id);
       ctx.fillStyle=`rgba(0,0,0,${focus?.94:.75})`;ctx.fillRect(x-7,y-10,w+27,18);
@@ -525,7 +529,7 @@ function updateTagMode() {
 }
 
 function renderAbout() {
-  $('method-details').replaceChildren(el('p','',msg('about.method1')),el('p','',msg('about.method2')),el('p','fine-print',msg('about.language')));
+  $('method-details').replaceChildren(el('p','',msg('about.method1')),el('p','',msg('about.method2')),el('p','',msg('about.threshold')),el('p','fine-print',msg('about.language')));
   if (!data) return;
   const date=new Date(data.metadata?.capturedAt||data.metadata?.generatedAt||'2026-10-08');
   $('snapshot-date').textContent=msg('snapshot.label',{date:Number.isNaN(date.valueOf())?'2026.10.08':date.toLocaleDateString('sv-SE').replaceAll('-','.')});
@@ -593,11 +597,11 @@ function renderTrends() {
 
 async function init() {
   try {
-    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json', assetBase)),fetch(new URL('titles-en.json?v=20261008-english',assetBase))]);
+    const [response,translationResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-dense', assetBase)),fetch(new URL('titles-en.json?v=20261008-english',assetBase))]);
     if(!response.ok||!translationResponse.ok)throw new Error('Reference data could not be loaded');
     [data,english]=await Promise.all([response.json(),translationResponse.json()]);
     englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
-    nodes=data.nodes||[];edges=data.edges||[];clusters=data.clusters||[];
+    nodes=data.nodes||[];edges=[...(data.edges||[]),...(data.extraEdges||[])];clusters=data.clusters||[];
     if(!nodes.length)throw new Error(msg('error.emptyArchive'));
     const radii=nodes.map(n=>Math.hypot(...n.position)).sort((a,b)=>a-b);
     const radius=radii[Math.floor(radii.length*.94)] || 1;const scale=345/Math.max(1,radius);

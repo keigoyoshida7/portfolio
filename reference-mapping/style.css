@@ -45,3 +45,14 @@
   .detail-collapse{min-height:36px;padding:0 5px}
   .detail-compact-visible .camera-tools{right:0;bottom:101px}
 }
+
+@media(max-width:760px){
+  body.random-pick-active .map-space{--random-control-bottom:calc(141px - var(--footer))}
+  body.random-pick-active .range-controls{top:auto;bottom:var(--random-control-bottom);left:22px;right:auto;width:min(270px,calc(100% - 66px));gap:4px;align-items:flex-start}
+  body.random-pick-active .range-controls label{width:min(270px,100%);min-height:24px}
+  body.random-pick-active .range-controls label>span{width:92px;min-width:92px}
+  body.random-pick-active .range-controls input{flex:1;min-width:40px;max-width:110px;height:22px;background:linear-gradient(#3e3e3e,#3e3e3e) center/100% 1px no-repeat}
+  body.random-pick-active .view-tools{top:auto;bottom:calc(var(--random-control-bottom) + 60px);left:22px;right:auto;width:max-content;max-width:calc(100% - 66px);gap:4px 12px;align-items:center;align-content:flex-start}
+  body.random-pick-active .view-tools button{min-height:24px;padding:4px 0}
+  body.random-pick-active .camera-tools{right:0;bottom:var(--random-control-bottom)}
+}
