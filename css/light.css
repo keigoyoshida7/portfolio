@@ -1,0 +1,98 @@
+/* Static white background and black text; artwork keeps its original colors. */
+html.light-theme {
+  color-scheme: light;
+  background: #fff;
+  animation: none;
+  --bg: #fff;
+  --text: #000;
+  --sub: #000;
+  --dim: #000;
+}
+
+.light-theme body {
+  background: #fff;
+}
+
+.light-theme .home header {
+  isolation: isolate;
+}
+
+.light-theme body,
+.light-theme body * {
+  color: #000 !important;
+}
+
+.light-theme input::placeholder,
+.light-theme textarea::placeholder {
+  color: #000;
+  opacity: 1;
+}
+
+.light-theme body :focus-visible {
+  outline-color: #000;
+}
+
+.light-theme #logo img[src$="/white.png"] {
+  visibility: hidden;
+}
+
+.light-theme #menubar,
+.light-theme #menubar h2,
+.light-theme .work-tile figure,
+.light-theme .ta1 caption,
+.light-theme .look,
+.light-theme dialog,
+.light-theme .no-script {
+  background: #fff;
+}
+
+.light-theme header nav {
+  text-shadow: none;
+}
+
+.light-theme header nav a:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #000;
+}
+
+.light-theme #menubar_hdr,
+.light-theme .pagetop a {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.light-theme #menubar_hdr span {
+  border-color: #000;
+}
+
+.light-theme #menubar,
+.light-theme #menubar .submenu li,
+.light-theme .ta1,
+.light-theme .ta1 tr {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.light-theme .animation-btn {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4) inset;
+}
+
+.light-theme .animation-btn::before,
+.light-theme .animation-btn::after,
+.light-theme .animation-btn-inner::before,
+.light-theme .animation-btn-inner::after {
+  background-color: #000;
+}
+
+/* The captions stay white over the photographs' dark gradients. */
+.light-theme .work-tile figcaption,
+.light-theme .work-tile figcaption * {
+  color: #fff !important;
+}
+
+.light-theme .work-tile:focus-visible {
+  outline-color: #fff;
+}
+
+.light-theme ::selection {
+  color: #fff !important;
+  background: #000;
+}

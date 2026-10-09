@@ -1,7 +1,8 @@
-/* Shared black-and-white palette; the artwork keeps its original colors. */
+/* Static black background and white text; artwork keeps its original colors. */
 html.dark-theme {
   color-scheme: dark;
   background: #000;
+  animation: none;
   --bg: #000;
   --text: #fff;
   --sub: #fff;
@@ -86,4 +87,12 @@ html.dark-theme {
 
 .dark-theme svg text {
   fill: #fff;
+}
+
+/* Reference-map controls use the same black surface as the map. */
+.dark-theme .view-tools,
+.dark-theme .similarity-control,
+.dark-theme .map-instructions,
+.dark-theme .range-controls {
+  background: #000;
 }
