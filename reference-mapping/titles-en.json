@@ -1887,7 +1887,26 @@
     "Le petit prince": "The Little Prince",
     "l'appel du vide": "The Call of the Void",
     "generative music: Olivier Messiaen : Mode de valeurs et d'intensités": "Generative Music: Olivier Messiaen — Mode of Durations and Intensities",
-    "le fresnoy residency": "Le Fresnoy Residency"
+    "le fresnoy residency": "Le Fresnoy Residency",
+    "新しい酒は新しい酒袋に入れよ": "Put New Wine into New Wineskins",
+    "モダニズム": "Modernism",
+    "キャビテーション現象": "Cavitation",
+    "2010 心理学 再現性の危機": "2010: Psychology’s Replication Crisis",
+    "非自明な情報閉包": "Non-Trivial Information Closure",
+    "博士課程学生 — AI支援による楽曲制作 IRCAM": "Doctoral Student — AI-Assisted Music Composition at IRCAM",
+    "フランス 2030": "France 2030",
+    "Ircam 2026 ワーキンググループ": "IRCAM 2026 Working Groups",
+    "Carmine-Emanuele Cella Ircam": "Carmine-Emanuele Cella — IRCAM",
+    "IRCAM sorbonne": "IRCAM and Sorbonne",
+    "Ircam Musica Ex Machina": "IRCAM — Musica Ex Machina",
+    "涵養（カルチベーション）": "Cultivation (Kanyō)",
+    "Figures in air": "Figures in Air",
+    "3D force sensor": "3D Force Sensor",
+    "concret Ph": "Concret PH",
+    "多様体仮説": "Manifold Hypothesis",
+    "ベンタブラック": "Vantablack",
+    "CATCFDzero": "CATCFDzero",
+    "非有機的生": "Inorganic Life"
   },
   "clusters": {
     "c01": "Theoria",
@@ -2155,7 +2174,8 @@
   "metadata": {
     "language": "en",
     "version": "2026-10-08",
-    "japaneseTitleCount": 1879,
-    "method": "Editorial English display names translated from original titles and note context. Selected proper names and works checked against primary sources. Original titles, text, source URLs and graph data are preserved."
+    "japaneseTitleCount": 1891,
+    "method": "Editorial English display names translated from original titles and note context. Selected proper names and works checked against primary sources. Original titles, text, source URLs and graph data are preserved.",
+    "incrementalUpdatedAt": "2026-10-30"
   }
 }

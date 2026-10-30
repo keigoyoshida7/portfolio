@@ -24,6 +24,7 @@ window.LatentReferenceLinks = (() => {
   }
 
   function internalUrl(title, source) {
+    if (source === 'Curated') return null;
     if (!title || title.startsWith('#') || schemePattern.test(title) || /^[*`!\-]/u.test(title)) return null;
     try {
       if (title.startsWith('/')) {

@@ -5,8 +5,9 @@ const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const x = document.createElement(tag); if (cls) x.className = cls; if (text !== undefined) x.textContent = text; return x; };
 const number = value => Number(value || 0).toLocaleString('en-US');
 const sourceAliases = {NextResearch:'Tag1', ideaofintellection:'Tag2', 'Test-Object':'Tag3'};
-const sourceSlugs = {NextResearch:'nextresearch', ideaofintellection:'ideaofintellection', 'Test-Object':'test-object'};
-const sourceLabel = source => sourceAliases[source] || source;
+const sourceSlugs = {NextResearch:'nextresearch', ideaofintellection:'ideaofintellection', 'Test-Object':'test-object', Curated:'curated'};
+const sourceLabel = source => source === 'Curated' ? msg('static.curatedSource') : sourceAliases[source] || source;
+const allSources = () => [...document.querySelectorAll('.source-filter')].map(input => input.value);
 const referencePageUrl = node => {
   const [source, id] = String(node.id).split(':');
   return new URL(`references/${sourceSlugs[source]}/${id}.html`, document.baseURI).href;
@@ -47,7 +48,7 @@ let yaw = -.29, pitch = -.13, zoom = 1, panX = 0, panY = 0;
 let targetYaw = yaw, targetPitch = pitch, targetZoom = zoom, targetPanX = 0, targetPanY = 0;
 let visible = new Set(), projected = [], labelHits = [], selected = null, hovered = null, pinned = false;
 let showLabels = true, showLines = true, motion = true, randomPick = true, similarity = .02, tagMode = 'OR';
-let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
+let searchQuery = '', selectedCluster = '', selectedSubgroup = '', selectedTags = new Set(), selectedSources = new Set(allSources());
 let pointers = new Map(), dragState = null, pinchDistance = null, pointerX = -1000, pointerY = -1000;
 let pointerInside = false, lastInteraction = 0, needsRender = true, frameTime = 0, lastDraw = 0;
 let fullText = false, mobileDetailExpanded = false, hoveredSince = 0, hoveredCandidate = null, searchTimer;
@@ -183,7 +184,7 @@ function updateFilters() {
   if (selectedCluster) active.push(clusterLabel(clusterMap.get(selectedCluster)));
   if (selectedSubgroup) active.push(msg('filters.subgroup'));
   if (selectedTags.size) active.push(msg('filters.tags', {count: selectedTags.size, mode: tagMode}));
-  if (selectedSources.size !== 3) active.push(msg('filters.sources', {count: selectedSources.size}));
+  if (selectedSources.size !== allSources().length) active.push(msg('filters.sources', {count: selectedSources.size}));
   $('filter-summary').textContent = active.length ? active.join(' / ') : msg('filters.all');
   $('announcement').textContent = msg('announcement.visible', {count: number(visible.size)});
   if (selected && !visible.has(selected.id)) closeDetail();
@@ -192,12 +193,12 @@ function updateFilters() {
 }
 
 function updateConnectionCount() {
-  $('edge-count').textContent = number(edges.filter(e => visible.has(e.source) && visible.has(e.target) && (e.type === 'link' || e.weight >= similarity)).length);
+  $('edge-count').textContent = number(edges.filter(e => visible.has(e.source) && visible.has(e.target) && (e.type !== 'similarity' || e.weight >= similarity)).length);
 }
 
 function resetFilters() {
   selectedTags.clear(); searchQuery = ''; selectedCluster = ''; selectedSubgroup = ''; $('subgroup-filter').hidden=true; $('subgroup-filter').value='';
-  selectedSources = new Set(['NextResearch', 'ideaofintellection', 'Test-Object']);
+  selectedSources = new Set(allSources());
   $('search').value = ''; $('tag-search').value = ''; $('cluster-filter').value = '';
   document.querySelectorAll('.source-filter').forEach(x => x.checked = true);
   updateFilters();
@@ -305,6 +306,7 @@ function renderDetail() {
   pin.addEventListener('click',()=>{stopRandomPick();pinned=!pinned;renderDetail();needsRender=true;});
   const close=el('button','','×'); close.setAttribute('aria-label',msg('detail.close')); close.addEventListener('click',()=>closeDetail(true));
   actions.append(pin,close);top.append(actions);box.append(top,title,content);content.append(el('div','detail-source',sourceLabel(n.source)));
+  if(n.provenance?.kind==='curated')content.append(el('p','fine-print',msg('detail.curatedProvenance',{date:n.provenance.addedAt||'',name:n.provenance.suppliedBy||'Keigo Yoshida'})));
   const cluster=clusterMap.get(String(n.cluster));
   if (n.topicReview && cluster?.reviewed) {
     const review=el('section','topic-review');
@@ -329,7 +331,7 @@ function renderDetail() {
     if (fullText) {const body=el('div','full-text');body.lang=locale;if(translated)window.LatentReferenceLinks.appendSegments(body,translated.body);else window.LatentReferenceLinks.append(body,text,n.source,linkLabel);content.append(body);}
   }
   const referenceLink=el('a','detail-link',msg('detail.referencePage'));referenceLink.href=referencePageUrl(n);content.append(referenceLink);
-  const link=el('a','detail-link',msg('detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
+  const link=el('a','detail-link',msg(n.provenance?.kind==='curated'?'detail.readSource':'detail.openOriginal'));link.href=n.url;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
   const topicNeighbors=(n.themeNeighbors||[]).filter(id=>nodeMap.has(id));
   if(topicNeighbors.length){
     content.append(el('h3','',msg('detail.sameTheme')));
@@ -341,7 +343,8 @@ function renderDetail() {
   const neighbors=(n.neighbors || []).filter(v=>nodeMap.has(v.id));
   neighbors.slice(0,8).forEach(v=>{
     const target=nodeMap.get(v.id), b=el('button','neighbor',referenceTitle(target));
-    b.append(el('small','',msg(v.type==='link'?'detail.linked':'detail.similarity',{score:Number(v.weight).toFixed(2),reason:reasonText(v.reason || sourceLabel(target.source))})));
+    const relationship=v.type==='editorial' ? msg('detail.editorial')+(v.reason ? ' · '+(typeof v.reason==='object' ? v.reason[locale]||v.reason.en||'' : reasonText(v.reason)) : '') : msg(v.type==='link'?'detail.linked':'detail.similarity',{score:Number(v.weight).toFixed(2),reason:reasonText(v.reason || sourceLabel(target.source))});
+    b.append(el('small','',relationship));
     b.addEventListener('click',()=>{
       if (!visible.has(target.id)) { resetFilters(); }
       selectNode(target,true,true);
@@ -386,12 +389,12 @@ function draw(now) {
       const a=positions.get(edge.source),b=positions.get(edge.target);if(!a||!b)continue;
       const emphasis=selected&&(edge.source===selected.id||edge.target===selected.id);
       const within=a.node.cluster===b.node.cluster;
-      const baseline = edge.type==='link' ? (within?.09:.033) : (within?.037:.015);
-      const randomBaseline = edge.type==='link' ? (within?.16:.095) : (within?.075:.038);
+      const baseline = edge.type==='link' ? (within?.09:.033) : edge.type==='editorial' ? (within?.08:.04) : (within?.037:.015);
+      const randomBaseline = edge.type==='link' ? (within?.16:.095) : edge.type==='editorial' ? (within?.13:.08) : (within?.075:.038);
       const alpha=emphasis ? .50 : randomPick ? randomBaseline : selected ? .012 : baseline;
-      if (!emphasis && Math.hypot(a.x-b.x,a.y-b.y)>width*.45) continue;
+      if (!emphasis && edge.type!=='editorial' && Math.hypot(a.x-b.x,a.y-b.y)>width*.45) continue;
       ctx.strokeStyle=`rgba(221,221,221,${alpha})`;ctx.lineWidth=emphasis?.65:.4;
-      ctx.setLineDash(edge.type==='similarity'?[1,3]:[]);
+      ctx.setLineDash(edge.type==='similarity'?[1,3]:edge.type==='editorial'?[5,4]:[]);
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
     }
     ctx.setLineDash([]);
@@ -571,7 +574,9 @@ function renderAbout() {
   if (!data) return;
   const review=data.metadata?.topicReview;
   if(review)$('method-details').append(el('p','',msg('about.topicReview',{reviewed:number(review.reviewedPages),grouped:number(review.groupedPages),groups:number(review.groups),remaining:number(review.unresolvedPages)})));
-  const date=new Date(data.metadata?.capturedAt||data.metadata?.generatedAt||'2026-10-08');
+  if(nodes.some(node=>node.provenance?.kind==='curated'))$('method-details').append(el('p','fine-print',msg('about.curated')));
+  if(data.metadata?.latestCaptureAt)$('method-details').append(el('p','fine-print',msg('about.incremental',{date:data.metadata.latestCaptureAt.slice(0,10)})));
+  const date=new Date(data.metadata?.latestCaptureAt||data.metadata?.capturedAt||data.metadata?.generatedAt||'2026-10-08');
   $('snapshot-date').textContent=msg('snapshot.label',{date:Number.isNaN(date.valueOf())?'2026.10.08':date.toLocaleDateString('sv-SE').replaceAll('-','.')});
   $('snapshot-info').textContent=msg('snapshot.info',{count:number(nodes.length)});
 }
@@ -639,20 +644,24 @@ function renderTrends() {
 
 async function init() {
   try {
-    const [response,translationResponse,noteResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261008-worldmaking', assetBase)),fetch(new URL('titles-en.json?v=20261008-worldmaking',assetBase)),fetch(new URL('notes-en.json?v=20261009-full-en',assetBase))]);
+    const [response,translationResponse,noteResponse]=await Promise.all([fetch(new URL('mapping.json?v=20261030-nextresearch', assetBase)),fetch(new URL('titles-en.json?v=20261030-nextresearch',assetBase)),fetch(new URL('notes-en.json?v=20261030-nextresearch',assetBase))]);
     if(!response.ok||!translationResponse.ok||!noteResponse.ok)throw new Error('Reference data could not be loaded');
     [data,english,noteEnglish]=await Promise.all([response.json(),translationResponse.json(),noteResponse.json()]);
     englishLookup=new Map(Object.entries({...english.terms,...english.titles}).map(([original,translated])=>[normalize(original),translated]));
-    nodes=data.nodes||[];edges=[...(data.edges||[]),...(data.extraEdges||[])];clusters=data.clusters||[];
+    nodes=data.nodes||[];edges=[...(data.edges||[]),...(data.extraEdges||[]),...(data.editorialEdges||[])];clusters=data.clusters||[];
     if(!nodes.length)throw new Error(msg('error.emptyArchive'));
     if(nodes.some(node=>!Array.isArray(noteEnglish.entries[node.id]?.body)||!Array.isArray(noteEnglish.entries[node.id]?.excerpt)))throw new Error('English note translations are incomplete');
     const radii=nodes.map(n=>Math.hypot(...n.position)).sort((a,b)=>a-b);
     const radius=radii[Math.floor(radii.length*.94)] || 1;const scale=345/Math.max(1,radius);
     for(const n of nodes){n.position=n.position.map(v=>v*scale);n.tags=n.tags||[];n.neighbors=n.neighbors||[];n.search=normalize(`${n.title}\n${englishLabel(n.title)}\n${n.text||n.excerpt||''}\n${noteEnglish.entries[n.id].body.map(segment=>segment.t).join('')}\n${n.tags.map(t=>`${t} ${englishLabel(t)}`).join(' ')}`);nodeMap.set(n.id,n);}
     for(const c of clusters){c.position=(c.position||[0,0,0]).map(v=>v*scale);c.visibleCount=c.count;clusterMap.set(String(c.id),c);}
+    for(const edge of data.editorialEdges||[])for(const [from,to] of [[edge.source,edge.target],[edge.target,edge.source]]){
+      const node=nodeMap.get(from);if(node&&nodeMap.has(to)&&!node.neighbors.some(neighbor=>neighbor.id===to&&neighbor.type==='editorial'))node.neighbors.push({id:to,type:'editorial',reason:edge.reason});
+    }
     renderClusterOptions();
     const counts={};nodes.forEach(n=>counts[n.source]=(counts[n.source]||0)+1);
     $('next-count').textContent=number(counts.NextResearch);$('idea-count').textContent=number(counts.ideaofintellection);$('test-count').textContent=number(counts['Test-Object']);
+    $('curated-count').textContent=number(counts.Curated);
     $('total-count').textContent=number(nodes.length);$('cluster-count').textContent=number(clusters.length);
     renderAbout();
     $('loading').hidden=true;updateFilters();
@@ -664,7 +673,7 @@ async function init() {
     const originalFilterHandler=()=>{for(const c of clusters)c.visibleCount=0;for(const n of nodes)if(visible.has(n.id)){const c=clusterMap.get(String(n.cluster));if(c)c.visibleCount++;}};
     originalFilterHandler();
     const obs=new MutationObserver(()=>{originalFilterHandler();needsRender=true;});obs.observe($('visible-count'),{childList:true});
-    try{const r=await fetch(new URL('trends.json?v=20261008-worldmaking', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
+    try{const r=await fetch(new URL('trends.json?v=20261030-nextresearch', assetBase));if(r.ok){trends=await r.json();renderTrends();}else{trendsFailure='error.trendsReload';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}}catch{trendsFailure='error.trends';$('trends-content').replaceChildren(el('p','',msg(trendsFailure)));}
     window.latentMap={getState:()=>({locale,cluster:selectedCluster,fullText,randomPick,motion,rotationSpeed,similarity,randomPickInterval,nodes:nodes.length,edges:edges.length,clusters:clusters.length,visible:visible.size,selected:selected?.id||null,pinned,sources:[...selectedSources],tags:[...selectedTags],query:searchQuery,subgroup:selectedSubgroup,zoom:targetZoom}),getProjectedNodes:()=>projected.map(p=>({id:p.node.id,title:referenceTitle(p.node),x:p.x,y:p.y})),select:id=>{const n=nodeMap.get(id);if(n)selectNode(n,true);}};
   } catch(error) {
     mapFailed=true;$('loading').replaceChildren(el('span','',msg('error.map')));
