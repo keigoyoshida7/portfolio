@@ -1,13 +1,13 @@
 {
-  "generatedPages": 3217,
-  "indexablePages": 1362,
+  "generatedPages": 3218,
+  "indexablePages": 1363,
   "noindexPages": 1855,
-  "checkedSourcePages": 121,
+  "checkedSourcePages": 122,
   "criteria": "Index only substantive source text of at least 120 characters after removing title/URL/tag-only content, or a high/medium source-reviewed English rationale of at least 50 characters. Exclude source welcome templates. Generated neighbors and common page context never qualify a record.",
   "sourceCapturedAt": "2026-10-08T09:55:12.382729+00:00",
   "englishTranslatedAt": "2026-10-09",
   "reasons": {
-    "reviewed source rationale": 519,
+    "reviewed source rationale": 520,
     "source welcome template": 2,
     "brief note or source pointers only": 1853,
     "substantive source text": 843
@@ -15181,6 +15181,17 @@
       "sourceUpdated": "2026-10-26T08:26:12Z",
       "archiveModified": "2026-10-30",
       "checkedSource": null
+    },
+    {
+      "id": "NextResearch:6ae427852e91317b2286fe31",
+      "url": "https://keigoyoshida.jp/references/nextresearch/6ae427852e91317b2286fe31.html",
+      "path": "references/nextresearch/6ae427852e91317b2286fe31.html",
+      "indexable": true,
+      "reason": "reviewed source rationale",
+      "sourceTextCharacters": 0,
+      "sourceUpdated": "2026-10-30T05:14:08Z",
+      "archiveModified": "2026-10-30",
+      "checkedSource": "https://wired.jp/article/wired-innovation-award-2025-takashi-ikegami/"
     },
     {
       "id": "Test-Object:6a607e304fcb0fe1a472cddf",
@@ -32361,7 +32372,7 @@
       "reason": "brief note or source pointers only",
       "sourceTextCharacters": 0,
       "sourceUpdated": "2024-10-01T00:39:50Z",
-      "archiveModified": "2026-10-09",
+      "archiveModified": "2026-10-30",
       "checkedSource": null
     },
     {

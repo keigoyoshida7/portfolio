@@ -1906,7 +1906,8 @@
     "多様体仮説": "Manifold Hypothesis",
     "ベンタブラック": "Vantablack",
     "CATCFDzero": "CATCFDzero",
-    "非有機的生": "Inorganic Life"
+    "非有機的生": "Inorganic Life",
+    "池上高志　やがて全てが生命化する　Wired": "Takashi Ikegami — Eventually, Everything Will Become Alive — WIRED"
   },
   "clusters": {
     "c01": "Theoria",
@@ -2174,7 +2175,7 @@
   "metadata": {
     "language": "en",
     "version": "2026-10-08",
-    "japaneseTitleCount": 1891,
+    "japaneseTitleCount": 1892,
     "method": "Editorial English display names translated from original titles and note context. Selected proper names and works checked against primary sources. Original titles, text, source URLs and graph data are preserved.",
     "incrementalUpdatedAt": "2026-10-30"
   }
