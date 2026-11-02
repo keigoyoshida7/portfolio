@@ -2,7 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://keigoyoshida.jp/</loc>
-    <lastmod>2026-10-09</lastmod>
+    <lastmod>2026-11-02</lastmod>
+    <image:image>
+      <image:loc>https://keigoyoshida.jp/images/works/room46.webp</image:loc>
+    </image:image>
     <image:image>
       <image:loc>https://keigoyoshida.jp/images/works/room45.webp</image:loc>
     </image:image>
