@@ -1,0 +1,55 @@
+/* Shared playback layout for the work archives. */
+.work-video {
+  margin: 2rem auto;
+  scroll-margin-top: 1rem;
+}
+
+.work-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 85vh;
+  max-height: 85svh;
+  background: #000;
+  object-fit: contain;
+}
+
+.work-video figcaption {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.work-video__note {
+  display: block;
+}
+
+.work-video--instagram,
+.work-video--instagram .instagram-media {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 540px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.work-video--instagram iframe {
+  max-width: 100% !important;
+}
+
+.work-video__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.work-video__frame iframe {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
