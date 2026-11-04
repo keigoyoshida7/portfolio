@@ -17,8 +17,8 @@
     const compact = width < 600;
     const regularTarget = compact ? 130 : width < 1100 ? 205 : 230;
     const featuredTarget = compact ? 220 : width < 1100 ? 300 : 350;
-    const minFeaturedHeight = !compact && width < 1100 ? regularTarget * 1.1 : 0;
-    const minPortraitHeight = !compact && width < 1100 ? regularTarget * 1.35 : 0;
+    const minFeaturedHeight = compact ? 0 : regularTarget * 1.1;
+    const minPortraitHeight = !compact && width < 1100 ? regularTarget * 1.35 : minFeaturedHeight;
     const maxItems = width < 600 ? 2 : 6;
     const maxFeaturedItems = compact ? 1 : 3;
     const costs = Array(tiles.length + 1).fill(Infinity);
@@ -40,7 +40,7 @@
         if (hasFeatured && end - start + 1 > maxFeaturedItems && !portraitPair) break;
         const target = hasFeatured ? featuredTarget : regularTarget;
         const height = (width - gap * (end - start)) / sum;
-        // Keep selected projects visible when tablet rows regroup at nearby widths.
+        // Keep selected projects visible when rows regroup at nearby widths.
         const minimum = hasFeaturedPortrait ? minPortraitHeight : minFeaturedHeight;
         if (hasFeatured && height < minimum) break;
         const deviation = (height - target) / target;
