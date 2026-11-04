@@ -53,7 +53,7 @@
 }
 
 .works-gallery {
-  --gallery-gap: 4px;
+  --gallery-gap: 0px;
   display: flex;
   flex-wrap: wrap;
   gap: var(--gallery-gap);
@@ -144,10 +144,6 @@
 @media (max-width: 700px) {
   .works-page .works-main {
     margin: 0 6px 40px;
-  }
-
-  .works-gallery {
-    --gallery-gap: 3px;
   }
 
   .work-tile figcaption {
