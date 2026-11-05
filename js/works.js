@@ -6,6 +6,7 @@
   const tiles = Array.from(gallery.querySelectorAll('.work-tile'));
   const ratios = tiles.map(tile => Number(tile.dataset.ratio));
   const featured = tiles.map(tile => tile.dataset.featured === 'true');
+  const preferCompact = tiles.map(tile => tile.dataset.compact === 'true');
   if (ratios.some(ratio => !Number.isFinite(ratio) || ratio <= 0)) return;
   let lastWidth = 0;
 
@@ -31,10 +32,12 @@
       let sum = 0;
       let hasFeatured = false;
       let hasFeaturedPortrait = false;
+      let hasCompactTile = false;
       for (let end = start; end < Math.min(tiles.length, start + maxItems); end++) {
         sum += ratios[end];
         hasFeatured = hasFeatured || featured[end];
         hasFeaturedPortrait = hasFeaturedPortrait || (featured[end] && ratios[end] < 1);
+        hasCompactTile = hasCompactTile || preferCompact[end];
         const portraitPair = compact && end === start + 1 &&
           ratios[start] < 1 && ratios[end] < 1 && featured[start] !== featured[end];
         if (hasFeatured && end - start + 1 > maxFeaturedItems && !portraitPair) break;
@@ -44,7 +47,9 @@
         const minimum = hasFeaturedPortrait ? minPortraitHeight : minFeaturedHeight;
         if (hasFeatured && height < minimum) break;
         const deviation = (height - target) / target;
-        const cost = deviation * deviation + costs[end + 1];
+        // Prefer a shorter row for compact tiles without making the row impossible.
+        const excessHeight = hasCompactTile ? Math.max(0, height / regularTarget - 1) : 0;
+        const cost = deviation * deviation + 3 * excessHeight * excessHeight + costs[end + 1];
         if (cost < costs[start]) {
           costs[start] = cost;
           ends[start] = end + 1;
